@@ -4,6 +4,8 @@ import auth from './modules/auth';
 import notifs from './modules/notifs';
 import counter from './modules/counter';
 import info from './modules/info';
+// chat reducer is imported directly in the chat container
+// exercise reducer is imported directly in the exercise container
 
 export default function createReducers(asyncReducers) {
   return {

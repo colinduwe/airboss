@@ -140,6 +140,11 @@ export default class App extends Component {
                   </NavItem>
                 </LinkContainer>
               )}
+              {user && (
+                <LinkContainer to="/event">
+                  <NavItem>Event</NavItem>
+                </LinkContainer>
+              )}
             </Nav>
             {user && (
               <p className="navbar-text">
