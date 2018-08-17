@@ -141,8 +141,8 @@ export default class App extends Component {
                 </LinkContainer>
               )}
               {user && (
-                <LinkContainer to="/event">
-                  <NavItem>Event</NavItem>
+                <LinkContainer to="/events">
+                  <NavItem>Events</NavItem>
                 </LinkContainer>
               )}
             </Nav>

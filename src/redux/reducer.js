@@ -6,6 +6,7 @@ import counter from './modules/counter';
 import info from './modules/info';
 // chat reducer is imported directly in the chat container
 // exercise reducer is imported directly in the exercise container
+import exercise from './modules/exercise';
 
 export default function createReducers(asyncReducers) {
   return {
@@ -19,6 +20,7 @@ export default function createReducers(asyncReducers) {
       counter3: counter
     }),
     info,
+    exercise,
     ...asyncReducers
   };
 }

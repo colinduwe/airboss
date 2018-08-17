@@ -3,6 +3,7 @@ import custom from './custom';
 import users from './users';
 import messages from './messages';
 import exercises from './exercises';
+import aircraft from './aircraft';
 
 export default function services(app) {
   app.configure(authentication);
@@ -10,4 +11,5 @@ export default function services(app) {
   app.configure(users);
   app.configure(messages);
   app.configure(exercises);
+  app.configure(aircraft);
 }

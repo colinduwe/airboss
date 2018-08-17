@@ -5,10 +5,14 @@ const ADD_EXERCISE = 'redux-example/exercise/ADD_EXERCISE';
 const PATCH_EXERCISE = 'redux-example/exercise/PATCH_EXERCISE';
 const PATCH_EXERCISE_SUCCESS = 'redux-example/exercise/PATCH_EXERCISE_SUCCESS';
 const PATCH_EXERCISE_FAIL = 'redux-example/exercise/PATCH_EXERCISE_FAIL';
+const SELECT_EXERCISE = 'redux-example/exercise/SELECT_EXERCISE';
+const SELECT_EXERCISE_SUCCESS = 'redux-example/exercise/SELECT_EXERCISE_SUCCESS';
+const SELECT_EXERCISE_FAIL = 'redux-example/exercise/SELECT_EXERCISE_FAIL';
 
 const initialState = {
   loaded: false,
-  exercises: []
+  exercises: [],
+  exercise: {}
 };
 
 export default function reducer(state = initialState, action = {}) {
@@ -42,6 +46,10 @@ export default function reducer(state = initialState, action = {}) {
         ...state,
         exercises: state.exercises.map(exercise => (exercise._id === action.result._id ? action.result : exercise))
       };
+    case SELECT_EXERCISE_SUCCESS:
+      return Object.assign({}, state, {
+        exercise: action.result
+      });
     default:
       return state;
   }
@@ -75,5 +83,12 @@ export function patchExercise(id, data) {
   return {
     types: [PATCH_EXERCISE, PATCH_EXERCISE_SUCCESS, PATCH_EXERCISE_FAIL],
     promise: ({ app }) => app.service('exercises').patch(id, data)
+  };
+}
+
+export function selectExercise(id) {
+  return {
+    types: [SELECT_EXERCISE, SELECT_EXERCISE_SUCCESS, SELECT_EXERCISE_FAIL],
+    promise: ({ app }) => app.service('exercises').get(id, {})
   };
 }

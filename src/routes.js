@@ -4,6 +4,7 @@ import { App, Home, NotFound } from 'containers';
 import About from 'containers/About/Loadable';
 import Chat from 'containers/Chat/Loadable';
 import Exercise from 'containers/Exercise/Loadable';
+import ExerciseDetail from 'containers/ExerciseDetail/Loadable';
 import Login from 'containers/Login/Loadable';
 import LoginSuccess from 'containers/LoginSuccess/Loadable';
 import Register from 'containers/Register/Loadable';
@@ -30,7 +31,8 @@ const routes = [
       { path: '/', exact: true, component: Home },
       { path: '/about', component: About },
       { path: '/chat', component: Chat },
-      { path: '/event', component: Exercise },
+      { path: '/event/:id', component: ExerciseDetail },
+      { path: '/events', component: Exercise },
       { path: '/login', component: Login },
       { path: '/login-success', component: isAuthenticated(LoginSuccess) },
       { path: '/register', component: isNotAuthenticated(Register) },

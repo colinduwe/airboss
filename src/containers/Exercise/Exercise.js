@@ -37,6 +37,7 @@ export default class ExerciseFeathers extends Component {
     }),
     addExercise: PropTypes.func.isRequired,
     patchExercise: PropTypes.func.isRequired,
+    selectExercise: PropTypes.func.isRequired,
     exercises: PropTypes.arrayOf(PropTypes.object).isRequired
   };
 
@@ -91,7 +92,9 @@ export default class ExerciseFeathers extends Component {
   }
 
   render() {
-    const { exercises, user, patchExercise } = this.props;
+    const {
+      exercises, user, patchExercise, selectExercise
+    } = this.props;
     const { error } = this.state;
 
     const styles = require('./Exercise.scss');
@@ -110,6 +113,7 @@ export default class ExerciseFeathers extends Component {
                   exercise={exercise}
                   user={user}
                   patchExercise={patchExercise}
+                  selectExercise={selectExercise}
                 />
               ))}
             </div>
