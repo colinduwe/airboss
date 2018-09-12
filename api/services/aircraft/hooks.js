@@ -1,7 +1,7 @@
-import auth from '@feathersjs/authentication';
+// import auth from '@feathersjs/authentication';
 import local from '@feathersjs/authentication-local';
-import { restrictToOwner } from 'feathers-authentication-hooks';
-import { fastJoin, disallow, iff, isProvider, keep } from 'feathers-hooks-common';
+// import { restrictToOwner } from 'feathers-authentication-hooks';
+import { fastJoin, disallow } from 'feathers-hooks-common';
 import { required } from 'utils/validation';
 import { validateHook as validate } from 'hooks';
 
@@ -40,19 +40,22 @@ const aircraftHooks = {
       validate(schemaValidator),
       context => {
         context.data = {
-          name: context.data.text,
+          name: context.data.name,
           sentBy: context.params.user ? context.params.user._id : null, // Set the id of current user
           createdAt: new Date(),
-          exercise: context.data.exercise
+          exercise: context.data.exercise,
+          status: false,
+          log: []
         };
       }
     ],
     update: disallow(),
-    patch: [
+    /* patch: [
       auth.hooks.authenticate('jwt'),
       restrictToOwner({ ownerField: 'sentBy' }),
       iff(isProvider('external'), keep('text'))
-    ],
+    ], */
+    patch: [],
     remove: disallow()
   },
   after: {
@@ -61,7 +64,7 @@ const aircraftHooks = {
     get: joinAuthor,
     create: joinAuthor,
     update: [],
-    patch: joinAuthor,
+    patch: [],
     remove: []
   }
 };

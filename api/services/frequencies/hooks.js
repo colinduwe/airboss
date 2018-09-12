@@ -6,7 +6,7 @@ import { required } from 'utils/validation';
 import { validateHook as validate } from 'hooks';
 
 const schemaValidator = {
-  text: required
+  name: required
 };
 
 function joinResolvers(context) {
@@ -15,10 +15,10 @@ function joinResolvers(context) {
 
   return {
     joins: {
-      author: () => async exercise => {
-        const author = exercise.sentBy ? await users.get(exercise.sentBy) : null;
-        exercise.author = author;
-        return exercise;
+      author: () => async frequencies => {
+        const author = frequencies.sentBy ? await users.get(frequencies.sentBy) : null;
+        frequencies.author = author;
+        return frequencies;
       }
     }
   };
@@ -31,7 +31,7 @@ const joinAuthor = [
   local.hooks.protect('author.password')
 ];
 
-const exerciseHooks = {
+const frequenciesHooks = {
   before: {
     all: [],
     find: [],
@@ -40,20 +40,22 @@ const exerciseHooks = {
       validate(schemaValidator),
       context => {
         context.data = {
-          text: context.data.text,
+          name: context.data.name,
           sentBy: context.params.user ? context.params.user._id : null, // Set the id of current user
           createdAt: new Date(),
-          locations: []
+          exercise: context.data.exercise,
+          status: false,
+          log: []
         };
       }
     ],
     update: disallow(),
-    patch: [],
     /* patch: [
       auth.hooks.authenticate('jwt'),
       restrictToOwner({ ownerField: 'sentBy' }),
       iff(isProvider('external'), keep('text'))
     ], */
+    patch: [],
     remove: disallow()
   },
   after: {
@@ -62,9 +64,9 @@ const exerciseHooks = {
     get: joinAuthor,
     create: joinAuthor,
     update: [],
-    patch: [],
+    patch: [], // joinAuthor,
     remove: []
   }
 };
 
-export default exerciseHooks;
+export default frequenciesHooks;

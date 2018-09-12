@@ -42,9 +42,13 @@ export default function reducer(state = initialState, action = {}) {
         exercises: state.exercises.concat(action.exercise)
       };
     case PATCH_EXERCISE_SUCCESS:
+      if (state.exercise._id === action.result._id) {
+        state.exercise = action.result;
+      }
       return {
         ...state,
-        exercises: state.exercises.map(exercise => (exercise._id === action.result._id ? action.result : exercise))
+        exercises: state.exercises.map(exercise => (exercise._id === action.result._id ? action.result : exercise)),
+        exercise: state.exercise._id === action.result._id ? action.result : state.exercise
       };
     case SELECT_EXERCISE_SUCCESS:
       return Object.assign({}, state, {

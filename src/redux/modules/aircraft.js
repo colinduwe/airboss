@@ -1,6 +1,9 @@
 const LOAD = 'redux-example/aircraft/LOAD';
 const LOAD_SUCCESS = 'redux-example/aircraft/LOAD_SUCCESS';
 const LOAD_FAIL = 'redux-example/aircraft/LOAD_FAIL';
+const GET = 'redux-example/aircraft/GET';
+const GET_SUCCESS = 'redux-example/aircraft/GET_SUCCESS';
+const GET_FAIL = 'redux-example/aircraft/GET_FAIL';
 const ADD_AIRCRAFT = 'redux-example/aircraft/ADD_AIRCRAFT';
 const PATCH_AIRCRAFT = 'redux-example/aircraft/PATCH_AIRCRAFT';
 const PATCH_AIRCRAFT_SUCCESS = 'redux-example/aircraft/PATCH_AIRCRAFT_SUCCESS';
@@ -19,7 +22,6 @@ export default function reducer(state = initialState, action = {}) {
         loading: true
       };
     case LOAD_SUCCESS:
-      console.log('Aircraft load success: ', action.result.data);
       return {
         ...state,
         loading: false,
@@ -27,6 +29,25 @@ export default function reducer(state = initialState, action = {}) {
         aircraft: action.result.data.reverse()
       };
     case LOAD_FAIL:
+      return {
+        ...state,
+        loading: false,
+        loaded: false,
+        error: action.error
+      };
+    case GET:
+      return {
+        ...state,
+        loading: true
+      };
+    case GET_SUCCESS:
+      return {
+        ...state,
+        loading: false,
+        loaded: true,
+        aircraftSelected: action.result
+      };
+    case GET_FAIL:
       return {
         ...state,
         loading: false,
@@ -52,17 +73,24 @@ export function isLoaded(globalState) {
   return globalState.aircraft && globalState.aircraft.loaded;
 }
 
-export function load() {
-  console.log('loading aircraft...');
+export function load(queryVars) {
   return {
     types: [LOAD, LOAD_SUCCESS, LOAD_FAIL],
     promise: ({ app }) =>
       app.service('aircraft').find({
         query: {
+          ...queryVars,
           $sort: { createdAt: -1 },
           $limit: 25
         }
       })
+  };
+}
+
+export function get(id) {
+  return {
+    types: [GET, GET_SUCCESS, GET_FAIL],
+    promise: ({ app }) => app.service('aircraft').get(id)
   };
 }
 

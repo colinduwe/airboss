@@ -3,17 +3,17 @@ import PropTypes from 'prop-types';
 import { provideHooks } from 'redial';
 import { connect } from 'react-redux';
 import cn from 'classnames';
-import reducer, * as exerciseActions from 'redux/modules/exercise';
-import * as aircraftActions from 'redux/modules/aircraft';
+import exerciseReducer, * as exerciseActions from 'redux/modules/exercise';
+import aircraftReducer, * as aircraftActions from 'redux/modules/aircraft';
+import frequencyReducer, * as frequencyActions from 'redux/modules/frequency';
 import { withApp } from 'hoc';
-// import ExerciseItem from 'components/ExerciseItem/ExerciseItem';
-import { ToggleButton, ToggleButtonGroup, ListGroup, ListGroupItem } from 'react-bootstrap';
-// import { socket } from 'app';
+import ExerciseDetail from 'components/ExerciseDetail/ExerciseDetail';
+import ExerciseEdition from 'components/ExerciseDetail/ExerciseEdition';
 import NotFound from 'containers/NotFound/NotFound';
 
 @provideHooks({
   fetch: async ({ store: { dispatch, getState, inject } }) => {
-    inject({ exercise: reducer });
+    inject({ exercise: exerciseReducer, aircraft: aircraftReducer, frequency: frequencyReducer });
 
     const state = getState();
     let id = '';
@@ -28,17 +28,20 @@ import NotFound from 'containers/NotFound/NotFound';
       }
       return Promise.all([
         dispatch(exerciseActions.selectExercise(id)).catch(() => null),
-        dispatch(aircraftActions.load()).catch(() => null)
+        dispatch(aircraftActions.load({ exercise: id })).catch(() => null),
+        dispatch(frequencyActions.load({ exercise: id })).catch(() => null)
       ]);
     }
   }
 })
 @connect(
   state => ({
-    exercise: state.exercise.exercise
-    // user: state.auth.user
+    exercise: state.exercise.exercise,
+    user: state.auth.user,
+    aircraft: state.aircraft.aircraft,
+    frequencies: state.frequency.frequencies
   }),
-  { ...exerciseActions }
+  { ...exerciseActions, ...aircraftActions, ...frequencyActions }
 )
 @withApp
 export default class ExerciseDetailFeathers extends Component {
@@ -48,11 +51,16 @@ export default class ExerciseDetailFeathers extends Component {
     }).isRequired,
     /* user: PropTypes.shape({
       email: PropTypes.string
-    }),
-    addExercise: PropTypes.func.isRequired,
+    }), */
+    addAircraft: PropTypes.func.isRequired,
+    addFrequency: PropTypes.func.isRequired,
     patchExercise: PropTypes.func.isRequired,
-    selectExercise: PropTypes.func.isRequired, */
-    exercise: PropTypes.objectOf(PropTypes.any).isRequired
+    // selectExercise: PropTypes.func.isRequired,
+    patchAirplane: PropTypes.func.isRequired,
+    patchFrequency: PropTypes.func.isRequired,
+    exercise: PropTypes.objectOf(PropTypes.any).isRequired,
+    aircraft: PropTypes.arrayOf(PropTypes.object).isRequired,
+    frequencies: PropTypes.arrayOf(PropTypes.object).isRequired
   };
 
   static defaultProps = {
@@ -62,25 +70,26 @@ export default class ExerciseDetailFeathers extends Component {
   constructor(props, context) {
     super(props, context);
 
-    this.handleToggle = this.handleToggle.bind(this);
+    let edit = '';
+    const pathParts = window.location.pathname.split('/');
+    [, , , edit] = pathParts;
+    if (edit === 'edit') {
+      this.state = {
+        editing: true
+      };
+    }
   }
 
   state = {
-    toggleButtonValue: 'aircraft',
-    itemName: '',
-    error: null
+    editing: false
   };
 
-  /* componentWillMount() {
-    console.log('Component Will Mount Prop: ', this.props);
-  } */
-
-  /* componentDidMount() {
-    const service = this.props.app.service('exercises');
-
-    service.on('created', this.props.addExercise);
-    setImmediate(() => this.scrollToBottom());
-  } */
+  componentDidMount() {
+    const aircraftService = this.props.app.service('aircraft');
+    const frequenciesService = this.props.app.service('frequencies');
+    aircraftService.on('created', this.props.addAircraft);
+    frequenciesService.on('created', this.props.addFrequency);
+  }
 
   /* componentDidUpdate(prevProps) {
     if (prevProps.exercises.length !== this.props.exercises.length) {
@@ -88,83 +97,58 @@ export default class ExerciseDetailFeathers extends Component {
     }
   } */
 
-  /* componentWillUnmount() {
-    this.props.app.service('exercises').removeListener('created', this.props.addExercise);
-  } */
-
-  handleSubmit = async event => {
-    event.preventDefault();
-
-    try {
-      console.log(this.state.itemName);
-      await this.props.app.service(this.state.toggleButtonValue).create({ name: this.state.itemName });
-      this.setState({
-        itemName: '',
-        error: false
-      });
-    } catch (error) {
-      console.log(error);
-      this.setState({ error: error.message || false });
-    }
-  };
-
-  /* scrollToBottom() {
-    this.exerciseList.current.scrollTop = this.exerciseList.current.scrollHeight;
-  } */
-
-  handleToggle(e) {
-    this.setState({ toggleButtonValue: e });
+  componentWillUnmount() {
+    this.props.app.service('aircraft').removeListener('created', this.props.addAircraft);
+    this.props.app.service('frequencies').removeListener('created', this.props.addFrequency);
   }
 
+  startEdit = () => {
+    this.setState({
+      editing: true
+    });
+  };
+
+  stopEdit = () => {
+    this.setState({
+      editing: false
+    });
+  };
+
   render() {
-    const { exercise } = this.props;
-    const { error } = this.state;
+    const { exercise, aircraft, frequencies } = this.props;
+    const { editing } = this.state;
 
     const styles = require('./ExerciseDetail.scss');
 
     let content;
-    if (Object.keys(exercise).length === 0) {
+    if (!exercise._id) {
       content = <NotFound />;
     } else {
       content = (
         <div className="container">
           <div className={cn('row', styles.eventWrapper)}>
-            <h1 className="text-center">{exercise.text}</h1>
-            <ToggleButtonGroup
-              type="radio"
-              name="aircraftfreqlisttoggle"
-              value={this.state.toggleButtonValue}
-              onChange={this.handleToggle}
-            >
-              <ToggleButton value="aircraft">Aircraft</ToggleButton>
-              <ToggleButton value="frequencies">Frequencies</ToggleButton>
-            </ToggleButtonGroup>
-            <div>TODO: ToggleButtonGroup for locations</div>
-            <ListGroup>
-              <ListGroupItem>Item 1</ListGroupItem>
-              <ListGroupItem>Item 2</ListGroupItem>
-            </ListGroup>
-
-            <form onSubmit={this.handleSubmit}>
-              <label htmlFor={`add-${this.state.toggleButtonValue}`}>
-                <em>Add {this.state.toggleButtonValue}</em>{' '}
-              </label>
-              <div className={cn('input-group', { 'has-error': error })}>
-                <input
-                  type="text"
-                  className="form-control"
-                  name={`add-${this.state.toggleButtonValue}`}
-                  placeholder={`${this.state.toggleButtonValue} name`}
-                  value={this.state.itemName}
-                  onChange={event => this.setState({ itemName: event.target.value })}
-                />
-                <span className="input-group-btn">
-                  <button className="btn btn-default" type="button" onClick={this.handleSubmit}>
-                    Add
-                  </button>
-                </span>
-              </div>
-            </form>
+            {editing ? (
+              <ExerciseEdition
+                exercise={exercise}
+                aircraft={aircraft}
+                frequencies={frequencies}
+                patchExercise={this.props.patchExercise}
+                patchAirplane={this.props.patchAirplane}
+                patchFrequency={this.props.patchFrequency}
+                styles={styles}
+                stopEdit={() => this.stopEdit()}
+              />
+            ) : (
+              <ExerciseDetail
+                exercise={exercise}
+                aircraft={aircraft}
+                frequencies={frequencies}
+                patchAirplane={this.props.patchAirplane}
+                patchFrequency={this.props.patchFrequency}
+                startEdit={() => this.startEdit()}
+                app={this.props.app}
+              />
+            )}
           </div>
         </div>
       );

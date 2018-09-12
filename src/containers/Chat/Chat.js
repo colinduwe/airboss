@@ -63,7 +63,6 @@ export default class ChatFeathers extends Component {
 
   componentDidMount() {
     const service = this.props.app.service('messages');
-
     service.on('created', this.props.addMessage);
     setImmediate(() => this.scrollToBottom());
 

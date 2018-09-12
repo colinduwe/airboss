@@ -28,7 +28,7 @@ const persistConfig = {
     // Ignore state from cookies, only use preloadedState from window object
     return originalState;
   },
-  whitelist: ['auth', 'info', 'chat']
+  whitelist: ['auth', 'info', 'chat', 'exercise', 'aircraft', 'frequencies']
 };
 
 const dest = document.getElementById('content');
