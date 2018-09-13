@@ -1,4 +1,4 @@
-// import auth from '@feathersjs/authentication';
+import auth from '@feathersjs/authentication';
 import local from '@feathersjs/authentication-local';
 // import { restrictToOwner } from 'feathers-authentication-hooks';
 import { fastJoin, disallow } from 'feathers-hooks-common';
@@ -33,7 +33,7 @@ const joinAuthor = [
 
 const frequenciesHooks = {
   before: {
-    all: [],
+    all: [auth.hooks.authenticate('jwt')],
     find: [],
     get: [],
     create: [
