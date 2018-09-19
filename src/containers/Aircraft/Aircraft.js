@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { provideHooks } from 'redial';
 import { connect } from 'react-redux';
@@ -58,8 +58,8 @@ export default class AircraftFeathers extends Component {
   }
 
   state = {
-    itemName: '',
-    error: null
+    itemName: ''
+    // error: null
   };
 
   /* componentWillMount() {
@@ -92,12 +92,12 @@ export default class AircraftFeathers extends Component {
       };
       await this.props.app.service(this.state.toggleButtonValue).create(itemToAdd);
       this.setState({
-        itemName: '',
-        error: false
+        itemName: ''
+        // error: false
       });
     } catch (error) {
       console.log(error);
-      this.setState({ error: error.message || false });
+      // this.setState({ error: error.message || false });
     }
   };
 
@@ -109,13 +109,17 @@ export default class AircraftFeathers extends Component {
     this.setState({ toggleButtonValue: e });
   }
 
+  /* startEdit() {
+    // alert('startEdit');
+  } */
+
   async patchLog(e) {
     await this.props.app.service(this.state.toggleButtonValue).patch(e);
   }
 
   render() {
     const { aircraft } = this.props;
-    const { error } = this.state;
+    // const { error } = this.state;
 
     const styles = require('./Aircraft.scss');
 
@@ -126,8 +130,22 @@ export default class AircraftFeathers extends Component {
       content = (
         <div className="container">
           <div className={cn('row', styles.eventWrapper)}>
-            <h1 className="text-center">{aircraft.name}</h1>
-            <Button>TODO: Edit Aircraft</Button>
+            <h1 className="text-center">
+              {aircraft.name}
+              <Fragment>
+                {' '}
+                <button
+                  className={cn('btn btn-sm btn-link', styles.controlBtn)}
+                  tabIndex={0}
+                  title="Edit"
+                  onClick={this.startEdit}
+                  onKeyPress={this.startEdit}
+                >
+                  <span className="fa fa-pencil" aria-hidden="true" />
+                </button>
+              </Fragment>
+            </h1>
+            <h3 className="text-center">TODO: Assigned to location</h3>
             <ListGroup>
               {aircraft.log.map(logItem => (
                 <LogItem
@@ -141,34 +159,19 @@ export default class AircraftFeathers extends Component {
               ))}
             </ListGroup>
 
-            <form onSubmit={this.handleSubmit}>
-              <label htmlFor={`add-${this.state.toggleButtonValue}`}>
-                <em>Add {this.state.toggleButtonValue}</em>{' '}
-              </label>
-              <div className={cn('input-group', { 'has-error': error })}>
-                <input
-                  type="text"
-                  className="form-control"
-                  name="name"
-                  placeholder={`${this.state.toggleButtonValue} name`}
-                  value={this.state.itemName}
-                  onChange={event => this.setState({ itemName: event.target.value })}
-                />
-                <input
-                  type="hidden"
-                  name="exercise"
-                  value={aircraft._id}
-                  ref={input => {
-                    this.exerciseInput = input;
-                  }}
-                />
-                <span className="input-group-btn">
-                  <button className="btn btn-default" type="button" onClick={this.handleSubmit}>
-                    Add
-                  </button>
-                </span>
-              </div>
-            </form>
+            <Button
+              className="btn"
+              tabIndex={0}
+              title="Add Log Entry"
+              onClick={() => {
+                alert('add log entry');
+              }}
+              onKeyPress={() => {
+                alert('add log entry');
+              }}
+            >
+              TODO: Add log entry
+            </Button>
             <div className="note">
               If you add a log entry that is newer than the last entry that aircraft's state will automatically chnage
               to the latest log entry's state.

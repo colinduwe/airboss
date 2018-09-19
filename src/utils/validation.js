@@ -36,6 +36,12 @@ export function integer(value) {
   }
 }
 
+export function nonEmptyArray(value) {
+  if (!Array.isArray(value) || (Array.isArray(value) && value.length === 0)) {
+    return 'Must have at least one entry';
+  }
+}
+
 export function oneOf(enumeration) {
   return value => {
     if (!enumeration.includes(value)) {

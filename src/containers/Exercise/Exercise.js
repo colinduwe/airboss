@@ -6,6 +6,7 @@ import cn from 'classnames';
 import reducer, * as exerciseActions from 'redux/modules/exercise';
 import { withApp } from 'hoc';
 import ExerciseItem from 'components/ExerciseItem/ExerciseItem';
+import { Link } from 'react-router-dom';
 // import { socket } from 'app';
 
 @provideHooks({
@@ -37,7 +38,6 @@ export default class ExerciseFeathers extends Component {
     }),
     addExercise: PropTypes.func.isRequired,
     patchExercise: PropTypes.func.isRequired,
-    selectExercise: PropTypes.func.isRequired,
     exercises: PropTypes.arrayOf(PropTypes.object).isRequired
   };
 
@@ -49,11 +49,6 @@ export default class ExerciseFeathers extends Component {
     super(props);
     this.exerciseList = React.createRef();
   }
-
-  state = {
-    exercise: '',
-    error: null
-  };
 
   componentDidMount() {
     const service = this.props.app.service('exercises');
@@ -72,30 +67,12 @@ export default class ExerciseFeathers extends Component {
     this.props.app.service('exercises').removeListener('created', this.props.addExercise);
   }
 
-  handleSubmit = async event => {
-    event.preventDefault();
-
-    try {
-      await this.props.app.service('exercises').create({ text: this.state.exercise });
-      this.setState({
-        exercise: '',
-        error: false
-      });
-    } catch (error) {
-      console.log(error);
-      this.setState({ error: error.message || false });
-    }
-  };
-
   scrollToBottom() {
     this.exerciseList.current.scrollTop = this.exerciseList.current.scrollHeight;
   }
 
   render() {
-    const {
-      exercises, user, patchExercise, selectExercise
-    } = this.props;
-    const { error } = this.state;
+    const { exercises, user, patchExercise } = this.props;
 
     const styles = require('./Exercise.scss');
 
@@ -113,31 +90,12 @@ export default class ExerciseFeathers extends Component {
                   exercise={exercise}
                   user={user}
                   patchExercise={patchExercise}
-                  selectExercise={selectExercise}
                 />
               ))}
             </div>
-
-            <form onSubmit={this.handleSubmit}>
-              <label htmlFor="exercise">
-                <em>{user ? user.email : 'Anonymous'}</em>{' '}
-              </label>
-              <div className={cn('input-group', { 'has-error': error })}>
-                <input
-                  type="text"
-                  className="form-control"
-                  name="exercise"
-                  placeholder="Your event name here..."
-                  value={this.state.exercise}
-                  onChange={event => this.setState({ exercise: event.target.value })}
-                />
-                <span className="input-group-btn">
-                  <button className="btn btn-default" type="button" onClick={this.handleSubmit}>
-                    Send
-                  </button>
-                </span>
-              </div>
-            </form>
+            <Link className="btn btn-primary" to="/event/add/">
+              Add Event
+            </Link>
           </div>
         </div>
       </div>

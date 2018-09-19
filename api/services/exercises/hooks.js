@@ -2,11 +2,12 @@ import auth from '@feathersjs/authentication';
 import local from '@feathersjs/authentication-local';
 // import { restrictToOwner } from 'feathers-authentication-hooks';
 import { fastJoin, disallow } from 'feathers-hooks-common';
-import { required } from 'utils/validation';
+import { required, nonEmptyArray } from 'utils/validation';
 import { validateHook as validate } from 'hooks';
 
 const schemaValidator = {
-  text: required
+  text: required,
+  locations: nonEmptyArray
 };
 
 function joinResolvers(context) {
@@ -43,12 +44,12 @@ const exerciseHooks = {
           text: context.data.text,
           sentBy: context.params.user ? context.params.user._id : null, // Set the id of current user
           createdAt: new Date(),
-          locations: []
+          locations: context.data.locations
         };
       }
     ],
     update: disallow(),
-    patch: [],
+    patch: [validate(schemaValidator)],
     /* patch: [
       auth.hooks.authenticate('jwt'),
       restrictToOwner({ ownerField: 'sentBy' }),

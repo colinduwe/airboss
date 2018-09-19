@@ -5,6 +5,7 @@ import About from 'containers/About/Loadable';
 import Aircraft from 'containers/Aircraft/Loadable';
 import Chat from 'containers/Chat/Loadable';
 import Exercise from 'containers/Exercise/Loadable';
+import ExerciseAdd from 'containers/ExerciseAdd/Loadable';
 import ExerciseDetail from 'containers/ExerciseDetail/Loadable';
 import Frequency from 'containers/Frequency/Loadable';
 import Login from 'containers/Login/Loadable';
@@ -34,6 +35,7 @@ const routes = [
       { path: '/about', component: About },
       { path: '/aircraft/:id', component: isAuthenticated(Aircraft) },
       { path: '/chat', component: Chat },
+      { path: '/event/add', component: isAuthenticated(ExerciseAdd) },
       { path: '/event/:id', component: isAuthenticated(ExerciseDetail) },
       { path: '/events', component: isAuthenticated(Exercise) },
       { path: '/frequency/:id', component: isAuthenticated(Frequency) },

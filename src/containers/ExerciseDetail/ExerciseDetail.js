@@ -10,6 +10,7 @@ import { withApp } from 'hoc';
 import ExerciseDetail from 'components/ExerciseDetail/ExerciseDetail';
 import ExerciseEdition from 'components/ExerciseDetail/ExerciseEdition';
 import NotFound from 'containers/NotFound/NotFound';
+import { withRouter } from 'react-router-dom';
 
 @provideHooks({
   fetch: async ({ store: { dispatch, getState, inject } }) => {
@@ -44,6 +45,7 @@ import NotFound from 'containers/NotFound/NotFound';
   { ...exerciseActions, ...aircraftActions, ...frequencyActions }
 )
 @withApp
+@withRouter
 export default class ExerciseDetailFeathers extends Component {
   static propTypes = {
     app: PropTypes.shape({
@@ -60,7 +62,8 @@ export default class ExerciseDetailFeathers extends Component {
     patchFrequency: PropTypes.func.isRequired,
     exercise: PropTypes.objectOf(PropTypes.any).isRequired,
     aircraft: PropTypes.arrayOf(PropTypes.object).isRequired,
-    frequencies: PropTypes.arrayOf(PropTypes.object).isRequired
+    frequencies: PropTypes.arrayOf(PropTypes.object).isRequired,
+    history: PropTypes.objectOf(PropTypes.any).isRequired
   };
 
   static defaultProps = {
@@ -112,6 +115,7 @@ export default class ExerciseDetailFeathers extends Component {
     this.setState({
       editing: false
     });
+    this.props.history.push(`/event/${this.props.exercise._id}/`);
   };
 
   render() {
@@ -137,6 +141,7 @@ export default class ExerciseDetailFeathers extends Component {
                 patchFrequency={this.props.patchFrequency}
                 styles={styles}
                 stopEdit={() => this.stopEdit()}
+                navBack={() => this.stopEdit()}
               />
             ) : (
               <ExerciseDetail

@@ -12,7 +12,6 @@ export default class ExerciseItem extends Component {
       controlBtn: PropTypes.string
     }).isRequired,
     patchExercise: PropTypes.func.isRequired,
-    selectExercise: PropTypes.func.isRequired,
     exercise: PropTypes.objectOf(PropTypes.any).isRequired
   };
 
@@ -44,7 +43,7 @@ export default class ExerciseItem extends Component {
 
   render() {
     const {
-      exercise, user, patchExercise, selectExercise, styles
+      exercise, user, patchExercise, styles
     } = this.props;
     const { editing } = this.state;
 
@@ -59,15 +58,10 @@ export default class ExerciseItem extends Component {
               patchExercise={patchExercise}
               styles={styles}
               stopEdit={this.stopEdit}
+              navBack={this.stopEdit}
             />
           ) : (
-            <Exercise
-              exercise={exercise}
-              user={user}
-              styles={styles}
-              startEdit={this.startEdit}
-              selectExercise={selectExercise}
-            />
+            <Exercise exercise={exercise} user={user} styles={styles} startEdit={this.startEdit} />
           )}
         </div>
       </div>
