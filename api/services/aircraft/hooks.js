@@ -44,6 +44,7 @@ const aircraftHooks = {
           sentBy: context.params.user ? context.params.user._id : null, // Set the id of current user
           createdAt: new Date(),
           exercise: context.data.exercise,
+          location: context.data.location,
           status: false,
           log: []
         };

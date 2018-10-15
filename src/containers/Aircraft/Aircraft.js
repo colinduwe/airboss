@@ -10,29 +10,24 @@ import LogItem from 'components/LogItem/LogItem';
 import { Button, ListGroup } from 'react-bootstrap';
 // import { socket } from 'app';
 import NotFound from 'containers/NotFound/NotFound';
+import AircraftFrequencyEdition from 'components/AircraftFrequencyItem/AircraftFrequencyEdition';
 
 @provideHooks({
-  fetch: async ({ store: { dispatch, getState, inject } }) => {
+  fetch: async ({ store: { dispatch, getState, inject }, params: { id } }) => {
     inject({ aircraft: aircraftReducer });
 
     const state = getState();
-    let id = '';
 
-    if (state.online) {
-      const {
-        router: { location }
-      } = state;
-      if (location != null) {
-        const pathParts = location.pathname.split('/');
-        [, , id] = pathParts;
-      }
+    if (state.online && id) {
       return dispatch(aircraftActions.get(id));
     }
   }
 })
 @connect(
   state => ({
-    aircraft: state.aircraft.aircraftSelected
+    exercise: state.exercise.exercise,
+    aircraft: state.aircraft.aircraftSelected,
+    user: state.auth.user
   }),
   { ...aircraftActions }
 )
@@ -42,24 +37,42 @@ export default class AircraftFeathers extends Component {
     app: PropTypes.shape({
       service: PropTypes.func
     }).isRequired,
+    /* user: PropTypes.shape({
+      _id: PropTypes.string
+    }).isRequired, */
+    match: PropTypes.shape({
+      path: PropTypes.string
+    }).isRequired,
+    exercise: PropTypes.objectOf(PropTypes.any).isRequired,
     addAircraft: PropTypes.func.isRequired,
-    // patchAirplane: PropTypes.func.isRequired,
-    aircraft: PropTypes.objectOf(PropTypes.any).isRequired
+    patchAirplane: PropTypes.func.isRequired,
+    aircraft: PropTypes.objectOf(PropTypes.any)
   };
 
   static defaultProps = {
     // user: null
+    aircraft: {
+      name: '',
+      sentBy: '',
+      createdAt: new Date(),
+      exercise: null,
+      location: null,
+      status: false,
+      log: []
+    }
   };
 
   constructor(props, context) {
     super(props, context);
 
     this.handleToggle = this.handleToggle.bind(this);
+    this.startEdit = this.startEdit.bind(this);
   }
 
   state = {
-    itemName: ''
+    itemName: '',
     // error: null
+    mode: this.props.match.path === '/aircraft/add' ? 'add' : 'view' // view edit add
   };
 
   /* componentWillMount() {
@@ -109,22 +122,43 @@ export default class AircraftFeathers extends Component {
     this.setState({ toggleButtonValue: e });
   }
 
-  /* startEdit() {
-    // alert('startEdit');
-  } */
+  startEdit() {
+    this.setState({ mode: 'edit' });
+  }
 
   async patchLog(e) {
     await this.props.app.service(this.state.toggleButtonValue).patch(e);
   }
 
   render() {
-    const { aircraft } = this.props;
-    // const { error } = this.state;
+    const { aircraft, exercise } = this.props;
+    const { error } = this.state;
 
     const styles = require('./Aircraft.scss');
 
     let content;
-    if (!aircraft._id) {
+    if (this.state.mode === 'edit' && exercise._id) {
+      content = (
+        <div className="container">
+          <div className={cn('row', styles.eventWrapper, { 'has-error': error })}>
+            <AircraftFrequencyEdition
+              exercise={exercise}
+              aircraftFrequency={aircraft}
+              patchAircraftFrequency={this.props.patchAirplane}
+              styles={styles}
+              stopEdit={() => {
+                this.setState({ mode: 'view' });
+              }}
+              navBack={() => {
+                this.setState({ mode: 'view' });
+              }}
+              action="Edit"
+              title="Aircraft"
+            />
+          </div>
+        </div>
+      );
+    } else if (!aircraft._id) {
       content = <NotFound />;
     } else {
       content = (
@@ -141,11 +175,11 @@ export default class AircraftFeathers extends Component {
                   onClick={this.startEdit}
                   onKeyPress={this.startEdit}
                 >
-                  <span className="fa fa-pencil" aria-hidden="true" />
+                  <span className="fa fa-cogs" aria-hidden="true" />
                 </button>
               </Fragment>
             </h1>
-            <h3 className="text-center">TODO: Assigned to location</h3>
+            <h3 className="text-center">{`Assigned to ${aircraft.location.name}`}</h3>
             <ListGroup>
               {aircraft.log.map(logItem => (
                 <LogItem

@@ -13,20 +13,12 @@ import NotFound from 'containers/NotFound/NotFound';
 import { withRouter } from 'react-router-dom';
 
 @provideHooks({
-  fetch: async ({ store: { dispatch, getState, inject } }) => {
+  fetch: async ({ store: { dispatch, getState, inject }, params: { id } }) => {
     inject({ exercise: exerciseReducer, aircraft: aircraftReducer, frequency: frequencyReducer });
 
     const state = getState();
-    let id = '';
 
     if (state.online) {
-      const {
-        router: { location }
-      } = state;
-      if (location != null) {
-        const pathParts = location.pathname.split('/');
-        [, , id] = pathParts;
-      }
       return Promise.all([
         dispatch(exerciseActions.selectExercise(id)).catch(() => null),
         dispatch(aircraftActions.load({ exercise: id })).catch(() => null),
@@ -54,6 +46,9 @@ export default class ExerciseDetailFeathers extends Component {
     /* user: PropTypes.shape({
       email: PropTypes.string
     }), */
+    location: PropTypes.shape({
+      pathname: PropTypes.string
+    }).isRequired,
     addAircraft: PropTypes.func.isRequired,
     addFrequency: PropTypes.func.isRequired,
     patchExercise: PropTypes.func.isRequired,
@@ -74,7 +69,7 @@ export default class ExerciseDetailFeathers extends Component {
     super(props, context);
 
     let edit = '';
-    const pathParts = window.location.pathname.split('/');
+    const pathParts = props.location.pathname.split('/');
     [, , , edit] = pathParts;
     if (edit === 'edit') {
       this.state = {

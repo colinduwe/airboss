@@ -62,7 +62,8 @@ export default function reducer(state = initialState, action = {}) {
     case PATCH_AIRCRAFT_SUCCESS:
       return {
         ...state,
-        aircraft: state.aircraft.map(airplane => (airplane._id === action.result._id ? action.result : airplane))
+        aircraft: state.aircraft.map(airplane => (airplane._id === action.result._id ? action.result : airplane)),
+        aircraftSelected: state.aircraftSelected._id === action.result._id ? action.result : state.aircraftSelected
       };
     default:
       return state;

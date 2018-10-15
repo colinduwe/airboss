@@ -4,6 +4,7 @@ import { Form, Field } from 'react-final-form';
 import arrayMutators from 'final-form-arrays';
 import { FieldArray } from 'react-final-form-arrays';
 import { ListGroup, ListGroupItem, Button } from 'react-bootstrap';
+import { Link } from 'react-router-dom';
 import cn from 'classnames';
 import uuid from 'uuid/v4';
 
@@ -94,10 +95,34 @@ const ExerciseEdition = ({
     />
     <h4>Aircraft</h4>
     <ListGroup>{aircraft.map(airplane => <ListGroupItem key={airplane._id}>{airplane.name}</ListGroupItem>)}</ListGroup>
+    <Link
+      to={{
+        pathname: '/aircraft/add',
+        state: {
+          aircraftMode: 'add',
+          id: null
+        }
+      }}
+      className="btn btn-primary"
+    >
+      Add Aircraft
+    </Link>
     <h4>Frequencies</h4>
     <ListGroup>
       {frequencies.map(frequency => <ListGroupItem key={frequency._id}>{frequency.name}</ListGroupItem>)}
     </ListGroup>
+    <Link
+      to={{
+        pathname: '/frequency/add',
+        state: {
+          frequencyMode: 'add',
+          id: null
+        }
+      }}
+      className="btn btn-primary"
+    >
+      Add Frequency
+    </Link>
   </div>
 );
 

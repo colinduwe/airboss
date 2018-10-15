@@ -3,6 +3,7 @@ import { connectedReduxRedirect } from 'redux-auth-wrapper/history4/redirect';
 import { App, Home, NotFound } from 'containers';
 import About from 'containers/About/Loadable';
 import Aircraft from 'containers/Aircraft/Loadable';
+import AircraftAdd from 'containers/AircraftAdd/Loadable';
 import Chat from 'containers/Chat/Loadable';
 import Exercise from 'containers/Exercise/Loadable';
 import ExerciseAdd from 'containers/ExerciseAdd/Loadable';
@@ -33,11 +34,13 @@ const routes = [
     routes: [
       { path: '/', exact: true, component: Home },
       { path: '/about', component: About },
+      { path: '/aircraft/add', exact: true, component: isAuthenticated(AircraftAdd) },
       { path: '/aircraft/:id', component: isAuthenticated(Aircraft) },
       { path: '/chat', component: Chat },
       { path: '/event/add', component: isAuthenticated(ExerciseAdd) },
       { path: '/event/:id', component: isAuthenticated(ExerciseDetail) },
       { path: '/events', component: isAuthenticated(Exercise) },
+      { path: '/frequency/add', exact: true, component: isAuthenticated(Frequency) },
       { path: '/frequency/:id', component: isAuthenticated(Frequency) },
       { path: '/login', component: Login },
       { path: '/login-success', component: isAuthenticated(LoginSuccess) },

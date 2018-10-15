@@ -11,8 +11,8 @@ export default class ExerciseDetail extends Component {
     patchFrequency: PropTypes.func.isRequired,
     aircraft: PropTypes.arrayOf(PropTypes.object).isRequired,
     frequencies: PropTypes.arrayOf(PropTypes.object).isRequired,
-    startEdit: PropTypes.func.isRequired,
-    app: PropTypes.objectOf(PropTypes.any).isRequired
+    startEdit: PropTypes.func.isRequired
+    // app: PropTypes.objectOf(PropTypes.any).isRequired
   };
 
   constructor(props, context) {
@@ -20,23 +20,26 @@ export default class ExerciseDetail extends Component {
 
     this.handleToggle = this.handleToggle.bind(this);
     this.handleLocationToggle = this.handleLocationToggle.bind(this);
-    this.handleTextChange = this.handleTextChange.bind(this);
-    this.handelSubmit = this.handleSubmit.bind(this);
+    // this.handleTextChange = this.handleTextChange.bind(this);
+    // this.handelSubmit = this.handleSubmit.bind(this);
   }
 
   state = {
     toggleButtonValue: 'aircraft',
-    toggleLocationValue: '',
-    itemName: '',
-    error: null
+    toggleLocationValue: this.props.exercise.locations[0]._id
+    // itemName: '',
+    // error: null
   };
 
   handleToggle(e) {
     this.setState({ toggleButtonValue: e });
   }
   handleLocationToggle(e) {
+    console.log('e: ', e);
+    console.log('props.locations ', this.props.exercise.locations[0]._id);
     this.setState({ toggleLocationValue: e });
   }
+  /*
   handleTextChange(e) {
     this.setState({ itemName: e.target.value });
   }
@@ -59,13 +62,14 @@ export default class ExerciseDetail extends Component {
       this.setState({ error: error.message || false });
     }
   };
+  */
 
   render() {
     const {
       exercise, aircraft, frequencies, startEdit
     } = this.props;
 
-    const { toggleButtonValue, error } = this.state;
+    const { toggleButtonValue, toggleLocationValue } = this.state;
 
     const styles = require('./ExerciseDetail.scss');
 
@@ -110,7 +114,7 @@ export default class ExerciseDetail extends Component {
             <ToggleButtonGroup
               type="radio"
               name="locationtoggle"
-              value={this.state.locationToggleValue}
+              value={toggleLocationValue}
               onChange={this.handleLocationToggle}
             >
               {exercise.locations.map(loc => (
@@ -133,35 +137,6 @@ export default class ExerciseDetail extends Component {
             />
           ))}
         </ListGroup>
-
-        <form onSubmit={this.handleSubmit}>
-          <label htmlFor={`add-${toggleButtonValue}`}>
-            <em>Add {toggleButtonValue}</em>{' '}
-          </label>
-          <div className={cn('input-group', { 'has-error': error })}>
-            <input
-              type="text"
-              className="form-control"
-              name="name"
-              placeholder={`${toggleButtonValue} name`}
-              value={this.state.itemName}
-              onChange={this.handleTextChange}
-            />
-            <input
-              type="hidden"
-              name="exercise"
-              value={exercise._id}
-              ref={input => {
-                this.exerciseInput = input;
-              }}
-            />
-            <span className="input-group-btn">
-              <button className="btn btn-default" type="button" onClick={this.handleSubmit}>
-                Add
-              </button>
-            </span>
-          </div>
-        </form>
       </div>
     );
   }
