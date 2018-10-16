@@ -9,6 +9,7 @@ import Exercise from 'containers/Exercise/Loadable';
 import ExerciseAdd from 'containers/ExerciseAdd/Loadable';
 import ExerciseDetail from 'containers/ExerciseDetail/Loadable';
 import Frequency from 'containers/Frequency/Loadable';
+import FrequencyAdd from 'containers/FrequencyAdd/Loadable';
 import Login from 'containers/Login/Loadable';
 import LoginSuccess from 'containers/LoginSuccess/Loadable';
 import Register from 'containers/Register/Loadable';
@@ -40,7 +41,7 @@ const routes = [
       { path: '/event/add', component: isAuthenticated(ExerciseAdd) },
       { path: '/event/:id', component: isAuthenticated(ExerciseDetail) },
       { path: '/events', component: isAuthenticated(Exercise) },
-      { path: '/frequency/add', exact: true, component: isAuthenticated(Frequency) },
+      { path: '/frequency/add', exact: true, component: isAuthenticated(FrequencyAdd) },
       { path: '/frequency/:id', component: isAuthenticated(Frequency) },
       { path: '/login', component: Login },
       { path: '/login-success', component: isAuthenticated(LoginSuccess) },
