@@ -40,8 +40,8 @@ export default function reducer(state = initialState, action = {}) {
     case PATCH_FREQUENCY_SUCCESS:
       return {
         ...state,
-        frequencies: state.frequencies.map(frequency => (
-          frequency._id === action.result._id ? action.result : frequency))
+        frequencies: state.frequencies.map(frequency =>
+          (frequency._id === action.result._id ? action.result : frequency))
       };
     default:
       return state;

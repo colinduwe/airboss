@@ -63,7 +63,7 @@ export default function reducer(state = initialState, action = {}) {
       return {
         ...state,
         aircraft: state.aircraft.map(airplane => (airplane._id === action.result._id ? action.result : airplane)),
-        aircraftSelected: state.aircraftSelected._id === action.result._id ? action.result : state.aircraftSelected
+        aircraftSelected: action.result
       };
     default:
       return state;

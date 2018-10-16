@@ -6,7 +6,9 @@ import { required } from 'utils/validation';
 import { validateHook as validate } from 'hooks';
 
 const schemaValidator = {
-  name: required
+  name: required,
+  exercise: required,
+  location: required
 };
 
 function joinResolvers(context) {

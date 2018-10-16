@@ -20,25 +20,48 @@ export default class ExerciseDetail extends Component {
 
     this.handleToggle = this.handleToggle.bind(this);
     this.handleLocationToggle = this.handleLocationToggle.bind(this);
+    this.patchItem = this.patchItem.bind(this);
     // this.handleTextChange = this.handleTextChange.bind(this);
     // this.handelSubmit = this.handleSubmit.bind(this);
   }
 
   state = {
     toggleButtonValue: 'aircraft',
-    toggleLocationValue: this.props.exercise.locations[0]._id
-    // itemName: '',
+    toggleLocationValue: this.props.exercise.locations[0]._id,
+    filteredAircraft: this.props.aircraft.filter(item => this.props.exercise.locations[0]._id === item.location._id),
+    itemList: this.props.aircraft.filter(item => this.props.exercise.locations[0]._id === item.location._id)
+    // patchItem: this.props.patchAirplane
     // error: null
   };
 
   handleToggle(e) {
-    this.setState({ toggleButtonValue: e });
+    const itemList = e === 'aircraft' ? this.state.filteredAircraft : this.props.frequencies;
+    this.setState({
+      toggleButtonValue: e,
+      itemList
+    });
   }
   handleLocationToggle(e) {
-    console.log('e: ', e);
-    console.log('props.locations ', this.props.exercise.locations[0]._id);
-    this.setState({ toggleLocationValue: e });
+    this.setState({
+      toggleLocationValue: e,
+      filteredAircraft: this.props.aircraft.filter(item => e === item.location._id),
+      itemList: this.props.aircraft.filter(item => e === item.location._id)
+    });
   }
+  patchItem = async (id, data) => {
+    if (this.state.toggleButtonValue === 'aircraft') {
+      await this.props.patchAirplane(id, data);
+      this.setState({
+        filteredAircraft: this.props.aircraft.filter(item => this.state.toggleLocationValue === item.location._id)
+      });
+    } else {
+      await this.props.patchFrequency(id, data);
+    }
+    this.setState({
+      itemList: this.props[this.state.toggleButtonValue].filter(item =>
+        this.state.toggleLocationValue === item.location._id)
+    });
+  };
   /*
   handleTextChange(e) {
     this.setState({ itemName: e.target.value });
@@ -65,23 +88,11 @@ export default class ExerciseDetail extends Component {
   */
 
   render() {
-    const {
-      exercise, aircraft, frequencies, startEdit
-    } = this.props;
+    const { exercise, startEdit } = this.props;
 
-    const { toggleButtonValue, toggleLocationValue } = this.state;
+    const { toggleButtonValue, toggleLocationValue, itemList } = this.state;
 
     const styles = require('./ExerciseDetail.scss');
-
-    let itemType = aircraft;
-    let patchItem = this.props.patchAirplane;
-    if (toggleButtonValue === 'aircraft') {
-      itemType = aircraft;
-      patchItem = this.props.patchAirplane;
-    } else {
-      itemType = frequencies;
-      patchItem = this.props.patchFrequency;
-    }
 
     return (
       <div>
@@ -96,7 +107,7 @@ export default class ExerciseDetail extends Component {
               onClick={startEdit}
               onKeyPress={startEdit}
             >
-              <span className="fa fa-pencil" aria-hidden="true" />
+              <span className="fa fa-cogs" aria-hidden="true" />
             </button>
           </Fragment>
         </h1>
@@ -126,13 +137,13 @@ export default class ExerciseDetail extends Component {
           </div>
         )}
         <ListGroup>
-          {itemType.map(item => (
+          {itemList.map(item => (
             <AircraftFrequencyItem
               key={item._id}
               thisItem={item}
               status={item.status}
               exercise={exercise}
-              patchItem={patchItem}
+              patchItem={this.patchItem}
               aircraftOrFrequency={toggleButtonValue}
             />
           ))}
