@@ -1,6 +1,9 @@
 const LOAD = 'redux-example/frequencies/LOAD';
 const LOAD_SUCCESS = 'redux-example/frequencies/LOAD_SUCCESS';
 const LOAD_FAIL = 'redux-example/frequencies/LOAD_FAIL';
+const GET = 'redux-example/frequencies/GET';
+const GET_SUCCESS = 'redux-example/frequencies/GET_SUCCESS';
+const GET_FAIL = 'redux-example/frequencies/GET_FAIL';
 const ADD_FREQUENCY = 'redux-example/frequencies/ADD_FREQUENCY';
 const PATCH_FREQUENCY = 'redux-example/frequencies/PATCH_FREQUENCY';
 const PATCH_FREQUENCY_SUCCESS = 'redux-example/frequencies/PATCH_FREQUENCY_SUCCESS';
@@ -32,6 +35,25 @@ export default function reducer(state = initialState, action = {}) {
         loaded: false,
         error: action.error
       };
+    case GET:
+      return {
+        ...state,
+        loading: true
+      };
+    case GET_SUCCESS:
+      return {
+        ...state,
+        loading: false,
+        loaded: true,
+        frequencySelected: action.result
+      };
+    case GET_FAIL:
+      return {
+        ...state,
+        loading: false,
+        loaded: false,
+        error: action.error
+      };
     case ADD_FREQUENCY:
       return {
         ...state,
@@ -41,7 +63,8 @@ export default function reducer(state = initialState, action = {}) {
       return {
         ...state,
         frequencies: state.frequencies.map(frequency =>
-          (frequency._id === action.result._id ? action.result : frequency))
+          (frequency._id === action.result._id ? action.result : frequency)),
+        frequencySelected: action.result
       };
     default:
       return state;
@@ -63,6 +86,13 @@ export function load(queryVars) {
           $limit: 25
         }
       })
+  };
+}
+
+export function get(id) {
+  return {
+    types: [GET, GET_SUCCESS, GET_FAIL],
+    promise: ({ app }) => app.service('frequencies').get(id)
   };
 }
 

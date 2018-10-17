@@ -27,6 +27,7 @@ export default class ExerciseDetail extends Component {
 
   state = {
     toggleButtonValue: 'aircraft',
+    aircraftOrFrequency: 'aircraft',
     toggleLocationValue: this.props.exercise.locations[0]._id,
     filteredAircraft: this.props.aircraft.filter(item => this.props.exercise.locations[0]._id === item.location._id),
     itemList: this.props.aircraft.filter(item => this.props.exercise.locations[0]._id === item.location._id)
@@ -36,9 +37,11 @@ export default class ExerciseDetail extends Component {
 
   handleToggle(e) {
     const itemList = e === 'aircraft' ? this.state.filteredAircraft : this.props.frequencies;
+    const aircraftOrFrequency = e === 'aircraft' ? 'aircraft' : 'frequency';
     this.setState({
       toggleButtonValue: e,
-      itemList
+      itemList,
+      aircraftOrFrequency
     });
   }
   handleLocationToggle(e) {
@@ -52,15 +55,14 @@ export default class ExerciseDetail extends Component {
     if (this.state.toggleButtonValue === 'aircraft') {
       await this.props.patchAirplane(id, data);
       this.setState({
-        filteredAircraft: this.props.aircraft.filter(item => this.state.toggleLocationValue === item.location._id)
+        itemList: this.props.aircraft.filter(item => this.state.toggleLocationValue === item.location._id)
       });
     } else {
       await this.props.patchFrequency(id, data);
+      this.setState({
+        itemList: this.props.frequencies
+      });
     }
-    this.setState({
-      itemList: this.props[this.state.toggleButtonValue].filter(item =>
-        this.state.toggleLocationValue === item.location._id)
-    });
   };
   /*
   handleTextChange(e) {
@@ -90,7 +92,9 @@ export default class ExerciseDetail extends Component {
   render() {
     const { exercise, startEdit } = this.props;
 
-    const { toggleButtonValue, toggleLocationValue, itemList } = this.state;
+    const {
+      toggleButtonValue, toggleLocationValue, itemList, aircraftOrFrequency
+    } = this.state;
 
     const styles = require('./ExerciseDetail.scss');
 
@@ -144,7 +148,7 @@ export default class ExerciseDetail extends Component {
               status={item.status}
               exercise={exercise}
               patchItem={this.patchItem}
-              aircraftOrFrequency={toggleButtonValue}
+              aircraftOrFrequency={aircraftOrFrequency}
             />
           ))}
         </ListGroup>

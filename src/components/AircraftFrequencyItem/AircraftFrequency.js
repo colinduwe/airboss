@@ -38,7 +38,7 @@ export default class AircraftFrequency extends Component {
   };
 
   render() {
-    const { thisItem, status } = this.props;
+    const { thisItem, status, aircraftOrFrequency } = this.props;
 
     let latestLog = 'empty log';
     if (thisItem.log.length) {
@@ -49,7 +49,10 @@ export default class AircraftFrequency extends Component {
 
     return (
       <div>
-        <Link to={`/${this.props.aircraftOrFrequency}/${thisItem._id}`}>{thisItem.name}</Link>
+        <Link to={`/${aircraftOrFrequency}/${thisItem._id}`}>{thisItem.name}</Link>
+        {aircraftOrFrequency === 'frequencies' &&
+          <span>{thisItem.upperBound}-{thisItem.lowerBound} MHz</span>
+        }
         <ToggleButtonGroup
           type="radio"
           name="status"

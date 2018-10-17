@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { provideHooks } from 'redial';
 import { connect } from 'react-redux';
@@ -6,32 +6,26 @@ import cn from 'classnames';
 import frequencyReducer, * as frequencyActions from 'redux/modules/frequency';
 import { withApp } from 'hoc';
 import LogItem from 'components/LogItem/LogItem';
-import { ToggleButtonGroup, ToggleButton, ListGroup } from 'react-bootstrap';
+import { Button, ListGroup } from 'react-bootstrap';
 // import { socket } from 'app';
 import NotFound from 'containers/NotFound/NotFound';
+import FrequencyEdition from 'components/AircraftFrequencyItem/FrequencyEdition';
 
 @provideHooks({
-  fetch: async ({ store: { dispatch, getState, inject } }) => {
+  fetch: async ({ store: { dispatch, getState, inject }, params: { id } }) => {
     inject({ frequency: frequencyReducer });
 
     const state = getState();
-    let id = '';
 
-    if (state.online) {
-      const {
-        router: { location }
-      } = state;
-      if (location != null) {
-        const pathParts = location.pathname.split('/');
-        [, , id] = pathParts;
-      }
+    if (state.online && id) {
       return dispatch(frequencyActions.get(id));
     }
   }
 })
 @connect(
   state => ({
-    frequencies: state.frequency.frequencies
+    exercise: state.exercise.exercise,
+    frequency: state.frequency.frequencySelected
   }),
   { ...frequencyActions }
 )
@@ -42,33 +36,43 @@ export default class FrequencyFeathers extends Component {
       service: PropTypes.func
     }).isRequired,
     /* user: PropTypes.shape({
-      email: PropTypes.string
-    }), */
-    addAircraft: PropTypes.func.isRequired,
-    addFrequency: PropTypes.func.isRequired,
-    // patchExercise: PropTypes.func.isRequired,
-    // selectExercise: PropTypes.func.isRequired,
-    // patchAirplane: PropTypes.func.isRequired,
-    // patchFrequency: PropTypes.func.isRequired,
+      _id: PropTypes.string
+    }).isRequired, */
+    match: PropTypes.shape({
+      path: PropTypes.string
+    }).isRequired,
     exercise: PropTypes.objectOf(PropTypes.any).isRequired,
-    aircraft: PropTypes.arrayOf(PropTypes.object).isRequired,
-    frequencies: PropTypes.arrayOf(PropTypes.object).isRequired
+    addFrequency: PropTypes.func.isRequired,
+    patchFrequency: PropTypes.func.isRequired,
+    frequency: PropTypes.objectOf(PropTypes.any)
   };
 
   static defaultProps = {
     // user: null
+    frequency: {
+      name: '',
+      sentBy: '',
+      createdAt: new Date(),
+      exercise: null,
+      lowerBound: 0,
+      upperBound: 0,
+      spreadSpectrum: false,
+      status: false,
+      log: []
+    }
   };
 
   constructor(props, context) {
     super(props, context);
 
     this.handleToggle = this.handleToggle.bind(this);
+    this.startEdit = this.startEdit.bind(this);
   }
 
   state = {
-    toggleButtonValue: 'aircraft',
     itemName: '',
-    error: null
+    // error: null
+    mode: this.props.match.path === '/frequency/add' ? 'add' : 'view' // view edit add
   };
 
   /* componentWillMount() {
@@ -76,9 +80,7 @@ export default class FrequencyFeathers extends Component {
   } */
 
   componentDidMount() {
-    const aircraftService = this.props.app.service('aircraft');
     const frequenciesService = this.props.app.service('frequencies');
-    aircraftService.on('created', this.props.addAircraft);
     frequenciesService.on('created', this.props.addFrequency);
     // setImmediate(() => this.scrollToBottom());
   }
@@ -90,7 +92,6 @@ export default class FrequencyFeathers extends Component {
   } */
 
   componentWillUnmount() {
-    this.props.app.service('aircraft').removeListener('created', this.props.addAircraft);
     this.props.app.service('frequencies').removeListener('created', this.props.addFrequency);
   }
 
@@ -104,12 +105,12 @@ export default class FrequencyFeathers extends Component {
       };
       await this.props.app.service(this.state.toggleButtonValue).create(itemToAdd);
       this.setState({
-        itemName: '',
-        error: false
+        itemName: ''
+        // error: false
       });
     } catch (error) {
       console.log(error);
-      this.setState({ error: error.message || false });
+      // this.setState({ error: error.message || false });
     }
   };
 
@@ -121,42 +122,69 @@ export default class FrequencyFeathers extends Component {
     this.setState({ toggleButtonValue: e });
   }
 
+  startEdit() {
+    this.setState({ mode: 'edit' });
+  }
+
+  async patchLog(e) {
+    await this.props.app.service(this.state.toggleButtonValue).patch(e);
+  }
+
   render() {
-    const { exercise, aircraft, frequencies } = this.props;
+    const { frequency, exercise } = this.props;
     const { error } = this.state;
 
     const styles = require('./Frequency.scss');
 
-    let itemType = aircraft;
-    // let patchItem = this.props.patchAirplane;
-    if (this.state.toggleButtonValue === 'aircraft') {
-      itemType = aircraft;
-      // patchItem = this.props.patchAirplane;
-    } else {
-      itemType = frequencies;
-      // patchItem = this.props.patchFrequency;
-    }
-    console.log(itemType);
     let content;
-    if (!exercise._id) {
+    if (this.state.mode === 'edit' && exercise._id) {
+      content = (
+        <div className="container">
+          <div className={cn('row', styles.eventWrapper, { 'has-error': error })}>
+            <FrequencyEdition
+              exercise={exercise}
+              frequency={frequency}
+              patchFrequency={this.props.patchFrequency}
+              styles={styles}
+              stopEdit={() => {
+                this.setState({ mode: 'view' });
+              }}
+              navBack={() => {
+                this.setState({ mode: 'view' });
+              }}
+              action="Edit"
+              title="Frequency"
+            />
+          </div>
+        </div>
+      );
+    } else if (!frequency._id) {
       content = <NotFound />;
     } else {
       content = (
         <div className="container">
           <div className={cn('row', styles.eventWrapper)}>
-            <h1 className="text-center">{exercise.text}</h1>
-            <ToggleButtonGroup
-              type="radio"
-              name="aircraftfreqlisttoggle"
-              value={this.state.toggleButtonValue}
-              onChange={this.handleToggle}
-            >
-              <ToggleButton value="aircraft">Aircraft</ToggleButton>
-              <ToggleButton value="frequencies">Frequencies</ToggleButton>
-            </ToggleButtonGroup>
-            <div>TODO: ToggleButtonGroup for locations</div>
+            <h1 className="text-center">
+              {frequency.name}
+              <Fragment>
+                {' '}
+                <button
+                  className={cn('btn btn-sm btn-link', styles.controlBtn)}
+                  tabIndex={0}
+                  title="Edit"
+                  onClick={this.startEdit}
+                  onKeyPress={this.startEdit}
+                >
+                  <span className="fa fa-cogs" aria-hidden="true" />
+                </button>
+              </Fragment>
+            </h1>
+            <h3 className="text-center">{`${frequency.lowerBound} - ${frequency.upperBound} MHz`}</h3>
+            {frequency.spreadSpectrum &&
+              <h3 className="text-center">Spread Spectrum</h3>
+            }
             <ListGroup>
-              {aircraft.log.map(logItem => (
+              {frequency.log.map(logItem => (
                 <LogItem
                   key={logItem.date}
                   styles={styles}
@@ -168,34 +196,23 @@ export default class FrequencyFeathers extends Component {
               ))}
             </ListGroup>
 
-            <form onSubmit={this.handleSubmit}>
-              <label htmlFor={`add-${this.state.toggleButtonValue}`}>
-                <em>Add {this.state.toggleButtonValue}</em>{' '}
-              </label>
-              <div className={cn('input-group', { 'has-error': error })}>
-                <input
-                  type="text"
-                  className="form-control"
-                  name="name"
-                  placeholder={`${this.state.toggleButtonValue} name`}
-                  value={this.state.itemName}
-                  onChange={event => this.setState({ itemName: event.target.value })}
-                />
-                <input
-                  type="hidden"
-                  name="exercise"
-                  value={exercise._id}
-                  ref={input => {
-                    this.exerciseInput = input;
-                  }}
-                />
-                <span className="input-group-btn">
-                  <button className="btn btn-default" type="button" onClick={this.handleSubmit}>
-                    Add
-                  </button>
-                </span>
-              </div>
-            </form>
+            <Button
+              className="btn"
+              tabIndex={0}
+              title="Add Log Entry"
+              onClick={() => {
+                alert('add log entry');
+              }}
+              onKeyPress={() => {
+                alert('add log entry');
+              }}
+            >
+              TODO: Add log entry
+            </Button>
+            <div className="note">
+              If you add a log entry that is newer than the last entry that frequency's state will automatically change
+              to the latest log entry's state.
+            </div>
           </div>
         </div>
       );

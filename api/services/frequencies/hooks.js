@@ -6,7 +6,11 @@ import { required } from 'utils/validation';
 import { validateHook as validate } from 'hooks';
 
 const schemaValidator = {
-  name: required
+  name: required,
+  exercise: required,
+  lowerBound: required,
+  upperBound: required,
+  spreadSpectrum: required,
 };
 
 function joinResolvers(context) {
@@ -44,6 +48,9 @@ const frequenciesHooks = {
           sentBy: context.params.user ? context.params.user._id : null, // Set the id of current user
           createdAt: new Date(),
           exercise: context.data.exercise,
+          lowerBound: context.data.lowerBound,
+          upperBound: context.data.upperBound,
+          spreadSpectrum: context.data.spreadSpectrum,
           status: false,
           log: []
         };
