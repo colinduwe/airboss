@@ -1,14 +1,13 @@
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { provideHooks } from 'redial';
 import { connect } from 'react-redux';
 import cn from 'classnames';
+import uuid from 'uuid/v4';
 import frequencyReducer, * as frequencyActions from 'redux/modules/frequency';
 import { withApp } from 'hoc';
-import LogItem from 'components/LogItem/LogItem';
-import { Button, ListGroup } from 'react-bootstrap';
-// import { socket } from 'app';
 import NotFound from 'containers/NotFound/NotFound';
+import FrequencyDetailView from 'components/Frequency/FrequencyDetailView';
 import FrequencyEdition from 'components/AircraftFrequencyItem/FrequencyEdition';
 
 @provideHooks({
@@ -67,12 +66,14 @@ export default class FrequencyFeathers extends Component {
 
     this.handleToggle = this.handleToggle.bind(this);
     this.startEdit = this.startEdit.bind(this);
+    this.addLogEntry = this.addLogEntry.bind(this);
   }
 
   state = {
     itemName: '',
     // error: null
-    mode: this.props.match.path === '/frequency/add' ? 'add' : 'view' // view edit add
+    mode: this.props.match.path === '/frequency/add' ? 'add' : 'view', // view edit add
+    logEditNewItem: false
   };
 
   /* componentWillMount() {
@@ -126,13 +127,15 @@ export default class FrequencyFeathers extends Component {
     this.setState({ mode: 'edit' });
   }
 
-  async patchLog(e) {
-    await this.props.app.service(this.state.toggleButtonValue).patch(e);
+  async addLogEntry() {
+    const pushedLog = this.props.frequency.log.concat({ _id: uuid(), status: false, date: new Date() });
+    await this.props.patchFrequency(this.props.frequency._id, { log: pushedLog });
+    this.setState({ logEditNewItem: true });
   }
 
   render() {
-    const { frequency, exercise } = this.props;
-    const { error } = this.state;
+    const { frequency, exercise, patchFrequency } = this.props;
+    const { error, logEditNewItem } = this.state;
 
     const styles = require('./Frequency.scss');
 
@@ -144,7 +147,7 @@ export default class FrequencyFeathers extends Component {
             <FrequencyEdition
               exercise={exercise}
               frequency={frequency}
-              patchFrequency={this.props.patchFrequency}
+              patchFrequency={patchFrequency}
               styles={styles}
               stopEdit={() => {
                 this.setState({ mode: 'view' });
@@ -164,55 +167,15 @@ export default class FrequencyFeathers extends Component {
       content = (
         <div className="container">
           <div className={cn('row', styles.eventWrapper)}>
-            <h1 className="text-center">
-              {frequency.name}
-              <Fragment>
-                {' '}
-                <button
-                  className={cn('btn btn-sm btn-link', styles.controlBtn)}
-                  tabIndex={0}
-                  title="Edit"
-                  onClick={this.startEdit}
-                  onKeyPress={this.startEdit}
-                >
-                  <span className="fa fa-cogs" aria-hidden="true" />
-                </button>
-              </Fragment>
-            </h1>
-            <h3 className="text-center">{`${frequency.lowerBound} - ${frequency.upperBound} MHz`}</h3>
-            {frequency.spreadSpectrum &&
-              <h3 className="text-center">Spread Spectrum</h3>
-            }
-            <ListGroup>
-              {frequency.log.map(logItem => (
-                <LogItem
-                  key={logItem.date}
-                  styles={styles}
-                  // location
-                  status={logItem.status}
-                  date={logItem.date}
-                  patchLog={this.patchLog}
-                />
-              ))}
-            </ListGroup>
-
-            <Button
-              className="btn"
-              tabIndex={0}
-              title="Add Log Entry"
-              onClick={() => {
-                alert('add log entry');
-              }}
-              onKeyPress={() => {
-                alert('add log entry');
-              }}
-            >
-              TODO: Add log entry
-            </Button>
-            <div className="note">
-              If you add a log entry that is newer than the last entry that frequency's state will automatically change
-              to the latest log entry's state.
-            </div>
+            <FrequencyDetailView
+              frequency={frequency}
+              startEdit={this.startEdit}
+              addLogEntry={this.addLogEntry}
+              patchFrequency={patchFrequency}
+              logEditNewItem={logEditNewItem}
+              exercise={exercise}
+              styles={styles}
+            />
           </div>
         </div>
       );

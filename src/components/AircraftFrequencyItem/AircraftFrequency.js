@@ -50,9 +50,11 @@ export default class AircraftFrequency extends Component {
     return (
       <div>
         <Link to={`/${aircraftOrFrequency}/${thisItem._id}`}>{thisItem.name}</Link>
-        {aircraftOrFrequency === 'frequencies' &&
-          <span>{thisItem.upperBound}-{thisItem.lowerBound} MHz</span>
-        }
+        {aircraftOrFrequency === 'frequencies' && (
+          <span>
+            {thisItem.upperBound}-{thisItem.lowerBound} MHz
+          </span>
+        )}
         <ToggleButtonGroup
           type="radio"
           name="status"

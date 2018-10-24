@@ -80,6 +80,9 @@ var webpackConfig = module.exports = {
         loader: 'happypack/loader?id=sass',
         include: [path.resolve(__dirname, '../src')]
       }, {
+        test: /\.css$/,
+        loader: 'style-loader!css-loader',
+      }, {
         test: /\.woff2?(\?v=\d+\.\d+\.\d+)?$/,
         loader: 'url-loader',
         options: {

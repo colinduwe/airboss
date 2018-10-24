@@ -10,7 +10,7 @@ const schemaValidator = {
   exercise: required,
   lowerBound: required,
   upperBound: required,
-  spreadSpectrum: required,
+  spreadSpectrum: required
 };
 
 function joinResolvers(context) {
