@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
-import { CounterButton, GithubButton } from 'components';
+import { GithubButton } from 'components';
 import config from 'config';
 import Helmet from 'react-helmet';
 import { connect } from 'react-redux';
@@ -80,12 +80,6 @@ export default class Home extends Component {
         </div>
 
         <div className="container">
-          <div className={styles.counterContainer}>
-            <CounterButton multireducerKey="counter1" />
-            <CounterButton multireducerKey="counter2" />
-            <CounterButton multireducerKey="counter3" />
-          </div>
-
           <p>This starter boilerplate app uses the following technologies:</p>
 
           <ul>
@@ -217,13 +211,6 @@ export default class Home extends Component {
               data from the server initially, but allows for the user to refresh the data from the client.{' '}
               <code>About.js</code> contains a <code>MiniInfoBar</code> that displays the same data.
             </dd>
-            <dt>Server-side data loading</dt>
-            <dd>
-              The <Link to="/chat">Chat page</Link> demonstrates how to fetch data asynchronously from some source that
-              is needed to complete the server-side rendering. <code>Chat.js</code>'s
-              <code>provideHooks()</code> function is called before the chat page is loaded, on either the server or the
-              client, allowing all the widget data to be loaded and ready for the page to render.
-            </dd>
             <dt>Session based login</dt>
             <dd>
               On the <Link to="/login">Login page</Link> you can submit a username which will be sent to the server and
@@ -242,11 +229,6 @@ export default class Home extends Component {
               <Link to="/login-success">go there</Link> when you are not logged in, you will be forwarded back to this
               home page. This <strike>magic</strike> logic is performed by the
               <code>onEnter</code> hook within <code>routes.js</code>.
-            </dd>
-            <dt>WebSockets / socket.io</dt>
-            <dd>
-              The <Link to="/chat">Chat</Link> uses the socket.io technology for real-time communication between
-              clients.
             </dd>
           </dl>
 
