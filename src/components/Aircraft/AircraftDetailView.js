@@ -4,12 +4,18 @@ import { ListGroup } from 'react-bootstrap';
 import cn from 'classnames';
 import LogItemField from 'components/LogItem/LogItemField';
 
-const FrequencyDetailView = ({
-  frequency, patchFrequency, styles, startEdit, addLogEntry, logEditNewItem
+const AircraftDetailView = ({
+  aircraft,
+  patchAirplane,
+  styles,
+  startEdit,
+  addLogEntry,
+  logEditNewItem,
+  logNewItemShown
 }) => (
   <div>
     <h1 className="text-center">
-      {frequency.name}
+      {aircraft.name}
       <Fragment>
         {' '}
         <button
@@ -23,24 +29,24 @@ const FrequencyDetailView = ({
         </button>
       </Fragment>
     </h1>
-    <h3 className="text-center">{`${frequency.lowerBound} - ${frequency.upperBound} MHz`}</h3>
-    {frequency.spreadSpectrum && <h3 className="text-center">Spread Spectrum</h3>}
+    <h3 className="text-center">{`${aircraft.location.name}`}</h3>
     <ListGroup>
-      {frequency.log.map((logItem, index) => {
+      {aircraft.log.map((logItem, index) => {
         let inEdit = false;
-        if (logEditNewItem && index === frequency.log.length - 1) {
+        if (logEditNewItem && index === aircraft.log.length - 1) {
           inEdit = true;
+          logNewItemShown();
         }
         return (
           <LogItemField
             key={logItem._id}
             logItem={logItem}
-            label={frequency.name}
+            label={aircraft.location.name}
             indexKey={index}
             logEditNewItem={inEdit}
             styles={styles}
-            parent={frequency}
-            patchParent={patchFrequency}
+            parent={aircraft}
+            patchParent={patchAirplane}
           />
         );
       })}
@@ -59,16 +65,17 @@ const FrequencyDetailView = ({
   </div>
 );
 
-FrequencyDetailView.propTypes = {
-  frequency: PropTypes.objectOf(PropTypes.any).isRequired,
-  patchFrequency: PropTypes.func.isRequired,
+AircraftDetailView.propTypes = {
+  aircraft: PropTypes.objectOf(PropTypes.any).isRequired,
+  patchAirplane: PropTypes.func.isRequired,
   startEdit: PropTypes.func.isRequired,
   addLogEntry: PropTypes.func.isRequired,
   logEditNewItem: PropTypes.bool.isRequired,
+  logNewItemShown: PropTypes.func.isRequired,
   styles: PropTypes.shape({
     navbarEventTitle: PropTypes.string,
     inlineBlock: PropTypes.string
   }).isRequired
 };
 
-export default FrequencyDetailView;
+export default AircraftDetailView;

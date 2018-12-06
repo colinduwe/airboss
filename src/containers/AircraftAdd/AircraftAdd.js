@@ -8,7 +8,7 @@ import aircraftReducer, * as aircraftActions from 'redux/modules/aircraft';
 import frequencyReducer, * as frequencyActions from 'redux/modules/frequency';
 import { withApp } from 'hoc';
 // import ExerciseDetail from 'components/ExerciseDetail/ExerciseDetail';
-import AircraftEdition from 'components/AircraftFrequencyItem/AircraftFrequencyEdition';
+import AircraftEdition from 'components/Aircraft/AircraftEdition';
 // import uuid from 'uuid/v4';
 import { withRouter } from 'react-router-dom';
 

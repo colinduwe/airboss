@@ -17,8 +17,8 @@ export default class LogItemField extends Component {
       upText: PropTypes.string,
       downText: PropTypes.string
     }).isRequired,
-    frequency: PropTypes.objectOf(PropTypes.any).isRequired,
-    patchFrequency: PropTypes.func.isRequired
+    parent: PropTypes.objectOf(PropTypes.any).isRequired,
+    patchParent: PropTypes.func.isRequired
   };
 
   static get defaultProps() {
@@ -44,12 +44,6 @@ export default class LogItemField extends Component {
     logDate: moment(this.props.logItem.date)
   };
 
-  componentDidUpdate(prevProps) {
-    if (this.props.logEditNewItem !== prevProps.logEditNewItem) {
-      this.setState({ edit: this.props.logEditNewItem });
-    }
-  }
-
   startEdit() {
     this.setState({ edit: true });
   }
@@ -66,18 +60,18 @@ export default class LogItemField extends Component {
     this.setState({ logDate: date });
   }
   async patchLog() {
-    const patchedLog = this.props.frequency.log;
+    const patchedLog = this.props.parent.log;
     patchedLog[this.props.indexKey].status = this.state.logStatus;
     patchedLog[this.props.indexKey].date = this.state.logDate.format();
     patchedLog.sort((a, b) => a.date.localeCompare(b.date));
-    await this.props.patchFrequency(this.props.frequency._id, { log: patchedLog });
+    await this.props.patchParent(this.props.parent._id, { log: patchedLog });
     this.setState({ edit: false });
   }
 
   async deleteLog() {
-    const splicedLog = this.props.frequency.log;
+    const splicedLog = this.props.parent.log;
     splicedLog.splice(this.props.indexKey, 1);
-    await this.props.patchFrequency(this.props.frequency._id, { log: splicedLog });
+    await this.props.patchParent(this.props.parent._id, { log: splicedLog });
     this.setState({ edit: false });
   }
 

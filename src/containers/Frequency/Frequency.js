@@ -8,7 +8,7 @@ import frequencyReducer, * as frequencyActions from 'redux/modules/frequency';
 import { withApp } from 'hoc';
 import NotFound from 'containers/NotFound/NotFound';
 import FrequencyDetailView from 'components/Frequency/FrequencyDetailView';
-import FrequencyEdition from 'components/AircraftFrequencyItem/FrequencyEdition';
+import FrequencyEdition from 'components/Frequency/FrequencyEdition';
 
 @provideHooks({
   fetch: async ({ store: { dispatch, getState, inject }, params: { id } }) => {

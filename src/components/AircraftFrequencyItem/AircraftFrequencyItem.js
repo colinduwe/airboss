@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { ListGroupItem } from 'react-bootstrap';
 import AircraftFrequency from './AircraftFrequency';
-import AircraftFrequencyEdition from './AircraftFrequencyEdition';
+// import AircraftFrequencyEdition from './AircraftFrequencyEdition';
 
 export default class AircraftFrequencyItem extends Component {
   static propTypes = {
@@ -57,12 +57,7 @@ export default class AircraftFrequencyItem extends Component {
       <ListGroupItem className="media" key={thisItem._id}>
         <div className="media-body">
           {inEdition ? (
-            <AircraftFrequencyEdition
-              thisItem={thisItem}
-              patchItem={patchItem}
-              // styles={styles}
-              stopEdit={this.stopEdit}
-            />
+            <span>Oops I killed AircraftFrequencyEdition</span>
           ) : (
             <AircraftFrequency
               thisItem={thisItem}

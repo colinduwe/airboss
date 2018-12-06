@@ -1,16 +1,14 @@
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { provideHooks } from 'redial';
 import { connect } from 'react-redux';
 import cn from 'classnames';
+import uuid from 'uuid/v4';
 import aircraftReducer, * as aircraftActions from 'redux/modules/aircraft';
-// import frequencyReducer, * as frequencyActions from 'redux/modules/frequency';
 import { withApp } from 'hoc';
-import LogItem from 'components/LogItem/LogItem';
-import { Button, ListGroup } from 'react-bootstrap';
-// import { socket } from 'app';
 import NotFound from 'containers/NotFound/NotFound';
-import AircraftFrequencyEdition from 'components/AircraftFrequencyItem/AircraftFrequencyEdition';
+import AircraftDetailView from 'components/Aircraft/AircraftDetailView';
+import AircraftEdition from 'components/Aircraft/AircraftEdition';
 
 @provideHooks({
   fetch: async ({ store: { dispatch, getState, inject }, params: { id } }) => {
@@ -26,8 +24,7 @@ import AircraftFrequencyEdition from 'components/AircraftFrequencyItem/AircraftF
 @connect(
   state => ({
     exercise: state.exercise.exercise,
-    aircraft: state.aircraft.aircraftSelected,
-    user: state.auth.user
+    aircraft: state.aircraft.aircraftSelected
   }),
   { ...aircraftActions }
 )
@@ -56,7 +53,9 @@ export default class AircraftFeathers extends Component {
       sentBy: '',
       createdAt: new Date(),
       exercise: null,
-      location: null,
+      lowerBound: 0,
+      upperBound: 0,
+      spreadSpectrum: false,
       status: false,
       log: []
     }
@@ -67,29 +66,20 @@ export default class AircraftFeathers extends Component {
 
     this.handleToggle = this.handleToggle.bind(this);
     this.startEdit = this.startEdit.bind(this);
+    this.addLogEntry = this.addLogEntry.bind(this);
   }
 
   state = {
     itemName: '',
     // error: null
-    mode: this.props.match.path === '/aircraft/add' ? 'add' : 'view' // view edit add
+    mode: this.props.match.path === '/aircraft/add' ? 'add' : 'view', // view edit add
+    logEditNewItem: false
   };
-
-  /* componentWillMount() {
-    console.log('Component Will Mount Prop: ', this.props);
-  } */
 
   componentDidMount() {
     const aircraftService = this.props.app.service('aircraft');
     aircraftService.on('created', this.props.addAircraft);
-    // setImmediate(() => this.scrollToBottom());
   }
-
-  /* componentDidUpdate(prevProps) {
-    if (prevProps.exercises.length !== this.props.exercises.length) {
-      this.scrollToBottom();
-    }
-  } */
 
   componentWillUnmount() {
     this.props.app.service('aircraft').removeListener('created', this.props.addAircraft);
@@ -126,13 +116,19 @@ export default class AircraftFeathers extends Component {
     this.setState({ mode: 'edit' });
   }
 
-  async patchLog(e) {
-    await this.props.app.service(this.state.toggleButtonValue).patch(e);
+  logNewItemShown() {
+    this.setState({ logEditNewItem: false });
+  }
+
+  async addLogEntry() {
+    const pushedLog = this.props.aircraft.log.concat({ _id: uuid(), status: false, date: new Date() });
+    await this.props.patchAirplane(this.props.aircraft._id, { log: pushedLog });
+    this.setState({ logEditNewItem: true });
   }
 
   render() {
-    const { aircraft, exercise } = this.props;
-    const { error } = this.state;
+    const { aircraft, exercise, patchAirplane } = this.props;
+    const { error, logEditNewItem } = this.state;
 
     const styles = require('./Aircraft.scss');
 
@@ -141,10 +137,10 @@ export default class AircraftFeathers extends Component {
       content = (
         <div className="container">
           <div className={cn('row', styles.eventWrapper, { 'has-error': error })}>
-            <AircraftFrequencyEdition
+            <AircraftEdition
               exercise={exercise}
-              aircraftFrequency={aircraft}
-              patchAircraftFrequency={this.props.patchAirplane}
+              aircraft={aircraft}
+              patchAirplane={patchAirplane}
               styles={styles}
               stopEdit={() => {
                 this.setState({ mode: 'view' });
@@ -164,52 +160,16 @@ export default class AircraftFeathers extends Component {
       content = (
         <div className="container">
           <div className={cn('row', styles.eventWrapper)}>
-            <h1 className="text-center">
-              {aircraft.name}
-              <Fragment>
-                {' '}
-                <button
-                  className={cn('btn btn-sm btn-link', styles.controlBtn)}
-                  tabIndex={0}
-                  title="Edit"
-                  onClick={this.startEdit}
-                  onKeyPress={this.startEdit}
-                >
-                  <span className="fa fa-cogs" aria-hidden="true" />
-                </button>
-              </Fragment>
-            </h1>
-            <h3 className="text-center">{`Assigned to ${aircraft.location.name}`}</h3>
-            <ListGroup>
-              {aircraft.log.map(logItem => (
-                <LogItem
-                  key={logItem.date}
-                  styles={styles}
-                  // location
-                  status={logItem.status}
-                  date={logItem.date}
-                  patchLog={this.patchLog}
-                />
-              ))}
-            </ListGroup>
-
-            <Button
-              className="btn"
-              tabIndex={0}
-              title="Add Log Entry"
-              onClick={() => {
-                alert('add log entry');
-              }}
-              onKeyPress={() => {
-                alert('add log entry');
-              }}
-            >
-              TODO: Add log entry
-            </Button>
-            <div className="note">
-              If you add a log entry that is newer than the last entry that aircraft's state will automatically chnage
-              to the latest log entry's state.
-            </div>
+            <AircraftDetailView
+              aircraft={aircraft}
+              startEdit={this.startEdit}
+              addLogEntry={this.addLogEntry}
+              patchAirplane={patchAirplane}
+              logEditNewItem={logEditNewItem}
+              logNewItemShown={this.logNewItemShown}
+              exercise={exercise}
+              styles={styles}
+            />
           </div>
         </div>
       );
