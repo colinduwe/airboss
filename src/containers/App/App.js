@@ -98,7 +98,7 @@ export default class App extends Component {
     return (
       <div className={styles.app}>
         <Helmet {...config.app.head} />
-        <Navbar fixedTop>
+        <Navbar collapseOnSelect fixedTop>
           <Navbar.Header>
             <Navbar.Brand>
               <IndexLinkContainer to="/" activeStyle={{ color: '#33e0ff' }} className={styles.title}>
@@ -111,7 +111,7 @@ export default class App extends Component {
           </Navbar.Header>
 
           <Navbar.Collapse>
-            <Nav navbar>
+            <Nav>
               {!user && (
                 <LinkContainer to="/login">
                   <NavItem>Login</NavItem>

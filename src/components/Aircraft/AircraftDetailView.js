@@ -5,13 +5,7 @@ import cn from 'classnames';
 import LogItemField from 'components/LogItem/LogItemField';
 
 const AircraftDetailView = ({
-  aircraft,
-  patchAirplane,
-  styles,
-  startEdit,
-  addLogEntry,
-  logEditNewItem,
-  logNewItemShown
+  aircraft, patchAirplane, styles, startEdit, addLogEntry
 }) => (
   <div>
     <h1 className="text-center">
@@ -32,18 +26,14 @@ const AircraftDetailView = ({
     <h3 className="text-center">{`${aircraft.location.name}`}</h3>
     <ListGroup>
       {aircraft.log.map((logItem, index) => {
-        let inEdit = false;
-        if (logEditNewItem && index === aircraft.log.length - 1) {
-          inEdit = true;
-          logNewItemShown();
-        }
+        console.log(logItem);
         return (
           <LogItemField
             key={logItem._id}
             logItem={logItem}
             label={aircraft.location.name}
             indexKey={index}
-            logEditNewItem={inEdit}
+            logEditNewItem={logItem.inEdit}
             styles={styles}
             parent={aircraft}
             patchParent={patchAirplane}
@@ -70,8 +60,6 @@ AircraftDetailView.propTypes = {
   patchAirplane: PropTypes.func.isRequired,
   startEdit: PropTypes.func.isRequired,
   addLogEntry: PropTypes.func.isRequired,
-  logEditNewItem: PropTypes.bool.isRequired,
-  logNewItemShown: PropTypes.func.isRequired,
   styles: PropTypes.shape({
     navbarEventTitle: PropTypes.string,
     inlineBlock: PropTypes.string

@@ -1,5 +1,5 @@
 {
-  "name": "react-redux-universal-hot-example",
+  "name": "airboss",
   "description": "Example of an isomorphic (universal) webapp using react redux and hot reloading",
   "author": "Kévin Berthommier <kevin.bertho@gmail.com> (http://github.com/bertho-zero)",
   "contributors": [
@@ -98,7 +98,7 @@
     "prop-types": "^15.5.8",
     "qs": "^6.5.2",
     "react": "^16.3.1",
-    "react-bootstrap": "^0.32.1",
+    "react-bootstrap": "^0.32.4",
     "react-datepicker": "^1.7.0",
     "react-dom": "^16.3.1",
     "react-final-form": "^3.4.0",

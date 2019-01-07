@@ -72,8 +72,7 @@ export default class AircraftFeathers extends Component {
   state = {
     itemName: '',
     // error: null
-    mode: this.props.match.path === '/aircraft/add' ? 'add' : 'view', // view edit add
-    logEditNewItem: false
+    mode: this.props.match.path === '/aircraft/add' ? 'add' : 'view' // view edit add
   };
 
   componentDidMount() {
@@ -116,19 +115,20 @@ export default class AircraftFeathers extends Component {
     this.setState({ mode: 'edit' });
   }
 
-  logNewItemShown() {
-    this.setState({ logEditNewItem: false });
-  }
-
   async addLogEntry() {
-    const pushedLog = this.props.aircraft.log.concat({ _id: uuid(), status: false, date: new Date() });
+    const pushedLog = this.props.aircraft.log.concat({
+      _id: uuid(),
+      status: false,
+      date: new Date(),
+      time: null,
+      inEdit: true
+    });
     await this.props.patchAirplane(this.props.aircraft._id, { log: pushedLog });
-    this.setState({ logEditNewItem: true });
   }
 
   render() {
     const { aircraft, exercise, patchAirplane } = this.props;
-    const { error, logEditNewItem } = this.state;
+    const { error } = this.state;
 
     const styles = require('./Aircraft.scss');
 
@@ -165,8 +165,6 @@ export default class AircraftFeathers extends Component {
               startEdit={this.startEdit}
               addLogEntry={this.addLogEntry}
               patchAirplane={patchAirplane}
-              logEditNewItem={logEditNewItem}
-              logNewItemShown={this.logNewItemShown}
               exercise={exercise}
               styles={styles}
             />

@@ -10,7 +10,6 @@ export default class LogItemField extends Component {
     logItem: PropTypes.objectOf(PropTypes.any).isRequired,
     label: PropTypes.string.isRequired,
     indexKey: PropTypes.number,
-    logEditNewItem: PropTypes.bool,
     styles: PropTypes.shape({
       navbarEventTitle: PropTypes.string,
       inlineBlock: PropTypes.string,
@@ -23,8 +22,7 @@ export default class LogItemField extends Component {
 
   static get defaultProps() {
     return {
-      indexKey: 0,
-      logEditNewItem: false
+      indexKey: 0
     };
   }
 
@@ -39,7 +37,7 @@ export default class LogItemField extends Component {
   }
 
   state = {
-    edit: this.props.logEditNewItem,
+    edit: this.props.logItem.inEdit,
     logStatus: this.props.logItem.status,
     logDate: moment(this.props.logItem.date)
   };
@@ -63,6 +61,7 @@ export default class LogItemField extends Component {
     const patchedLog = this.props.parent.log;
     patchedLog[this.props.indexKey].status = this.state.logStatus;
     patchedLog[this.props.indexKey].date = this.state.logDate.format();
+    patchedLog[this.props.indexKey].inEdit = false;
     patchedLog.sort((a, b) => a.date.localeCompare(b.date));
     await this.props.patchParent(this.props.parent._id, { log: patchedLog });
     this.setState({ edit: false });
