@@ -4,6 +4,7 @@ import { Form, FormGroup, ControlLabel, ListGroupItem, ToggleButtonGroup, Toggle
 import cn from 'classnames';
 import moment from 'moment';
 import DatePicker from 'react-datepicker';
+import ConfirmModal from 'components/ConfirmModal/ConfirmModal';
 
 export default class LogItemField extends Component {
   static propTypes = {
@@ -39,7 +40,9 @@ export default class LogItemField extends Component {
   state = {
     edit: this.props.logItem.inEdit,
     logStatus: this.props.logItem.status,
-    logDate: moment(this.props.logItem.date)
+    logDate: moment(this.props.logItem.date),
+    confirmShow: false,
+    confirmFunc: ''
   };
 
   startEdit() {
@@ -64,14 +67,16 @@ export default class LogItemField extends Component {
     patchedLog[this.props.indexKey].inEdit = false;
     patchedLog.sort((a, b) => a.date.localeCompare(b.date));
     await this.props.patchParent(this.props.parent._id, { log: patchedLog });
-    this.setState({ edit: false });
+    this.setState({
+      edit: false,
+      confirmShow: false
+    });
   }
 
   async deleteLog() {
     const splicedLog = this.props.parent.log;
     splicedLog.splice(this.props.indexKey, 1);
     await this.props.patchParent(this.props.parent._id, { log: splicedLog });
-    this.setState({ edit: false });
   }
 
   render() {
@@ -94,28 +99,52 @@ export default class LogItemField extends Component {
           </div>
         )}
         {edit && (
-          <Form inline>
-            <FormGroup>
-              <ControlLabel className={cn(statusStyleClass)}>{`${label}`}</ControlLabel>{' '}
-              <ToggleButtonGroup type="radio" name="status" value={logStatus} onChange={this.editStatus}>
-                <ToggleButton value>Up</ToggleButton>
-                <ToggleButton value={false}>Down</ToggleButton>
-              </ToggleButtonGroup>
-            </FormGroup>
-            <FormGroup>
-              <DatePicker
-                selected={logDate}
-                onChange={this.editDate}
-                showTimeSelect
-                timeFormat="HH:mm"
-                timeIntervals={1}
-                dateFormat="LLL"
-                timeCaption="time"
+          <div>
+            <Form inline>
+              <FormGroup>
+                <ControlLabel className={cn(statusStyleClass)}>{`${label}`}</ControlLabel>{' '}
+                <ToggleButtonGroup type="radio" name="status" value={logStatus} onChange={this.editStatus}>
+                  <ToggleButton value>Up</ToggleButton>
+                  <ToggleButton value={false}>Down</ToggleButton>
+                </ToggleButtonGroup>
+              </FormGroup>
+              <FormGroup>
+                <DatePicker
+                  selected={logDate}
+                  onChange={this.editDate}
+                  showTimeSelect
+                  timeFormat="HH:mm"
+                  timeIntervals={1}
+                  dateFormat="LLL"
+                  timeCaption="time"
+                />
+              </FormGroup>
+              <Button
+                onClick={() =>
+                  this.setState({
+                    confirmShow: true,
+                    confirmFunc: 'patchLog'
+                  })
+                }
+                style={{ cursor: 'pointer' }}
+                className="glyphicon glyphicon-ok"
               />
-            </FormGroup>
-            <Button onClick={this.patchLog} style={{ cursor: 'pointer' }} className="glyphicon glyphicon-ok" />
-            <Button onClick={this.deleteLog} style={{ cursor: 'pointer' }} className="glyphicon glyphicon-trash" />
-          </Form>
+              <Button
+                onClick={() =>
+                  this.setState({
+                    confirmShow: true,
+                    confirmFunc: 'deleteLog'
+                  })
+                }
+                className="glyphicon glyphicon-trash"
+              />
+            </Form>
+            <ConfirmModal
+              show={this.state.confirmShow}
+              onHide={() => this.setState({ confirmShow: false })}
+              confirmLogEntry={() => this[this.state.confirmFunc]()}
+            />
+          </div>
         )}
       </ListGroupItem>
     );
