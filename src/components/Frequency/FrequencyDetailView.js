@@ -2,15 +2,19 @@ import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { ListGroup } from 'react-bootstrap';
 import cn from 'classnames';
-import LogItemField from 'components/LogItem/LogItemField';
+import LogItem from 'components/LogItem/LogItem';
+import LogEdition from 'components/LogItem/LogEdition';
 
 const FrequencyDetailView = ({
   frequency,
   patchFrequency,
   styles,
   startEdit,
+  editLogEntry,
+  logEdition,
   addLogEntry,
-  logEditNewItem,
+  patchLogEntry,
+  deleteLogEntry,
   exercise
 }) => (
   <div>
@@ -32,22 +36,31 @@ const FrequencyDetailView = ({
     <h3 className="text-center">{`${frequency.lowerBound} - ${frequency.upperBound} MHz`}</h3>
     {frequency.spreadSpectrum && <h3 className="text-center">Spread Spectrum</h3>}
     <ListGroup>
-      {frequency.log.map((logItem, index) => {
-        let inEdit = false;
-        if (logEditNewItem && index === frequency.log.length - 1) {
-          inEdit = true;
+      {logEdition.map((logItem, index) => {
+        if (logItem.inEdit) {
+          return (
+            <LogEdition
+              key={logItem._id}
+              item={logItem}
+              label={frequency.name}
+              patchLogEntry={patchLogEntry}
+              deleteLogEntry={deleteLogEntry}
+              exercise={exercise}
+              styles={styles}
+            />
+          );
         }
         return (
-          <LogItemField
+          <LogItem
             key={logItem._id}
-            logItem={logItem}
+            item={logItem}
             label={frequency.name}
             indexKey={index}
-            logEditNewItem={inEdit}
-            styles={styles}
+            startEdit={editLogEntry}
             parent={frequency}
             patchParent={patchFrequency}
             exercise={exercise}
+            styles={styles}
           />
         );
       })}
@@ -71,8 +84,14 @@ FrequencyDetailView.propTypes = {
   patchFrequency: PropTypes.func.isRequired,
   startEdit: PropTypes.func.isRequired,
   exercise: PropTypes.objectOf(PropTypes.any).isRequired,
+  editLogEntry: PropTypes.func.isRequired,
+  logEdition: PropTypes.arrayOf(PropTypes.shape({
+    _id: PropTypes.string,
+    inEdit: PropTypes.bool.isRequired
+  })).isRequired,
   addLogEntry: PropTypes.func.isRequired,
-  logEditNewItem: PropTypes.bool.isRequired,
+  patchLogEntry: PropTypes.func.isRequired,
+  deleteLogEntry: PropTypes.func.isRequired,
   styles: PropTypes.shape({
     navbarEventTitle: PropTypes.string,
     inlineBlock: PropTypes.string

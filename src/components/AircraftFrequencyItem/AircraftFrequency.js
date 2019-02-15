@@ -33,7 +33,13 @@ export default class AircraftFrequency extends Component {
 
   confirmLogEntry = async () => {
     const logStatus = !this.props.status;
-    const log = this.props.thisItem.log.concat({ _id: uuid(), status: logStatus, date: new Date() });
+    const time = moment();
+    const log = this.props.thisItem.log.concat({
+      _id: uuid(),
+      status: logStatus,
+      date: new Date(),
+      time: time.format('HH:mm')
+    });
     await this.props.patchItem(this.props.thisItem._id, { status: logStatus, log });
     this.setState({ confirmShow: false });
   };
