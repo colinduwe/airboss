@@ -1,10 +1,25 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Form, FormGroup, ControlLabel, ListGroupItem, ToggleButtonGroup, ToggleButton, Button } from 'react-bootstrap';
+import {
+  Form,
+  FormGroup,
+  ControlLabel,
+  ListGroupItem,
+  ToggleButtonGroup,
+  ToggleButton,
+  Button,
+  FormControl,
+  HelpBlock
+} from 'react-bootstrap';
 import cn from 'classnames';
-import moment from 'moment';
-import DatePicker from 'react-datepicker';
+import Moment from 'moment';
+import { extendMoment } from 'moment-range';
+import 'react-dates/initialize';
+import 'react-dates/lib/css/_datepicker.css';
+import { SingleDatePicker } from 'react-dates';
 import ConfirmModal from 'components/ConfirmModal/ConfirmModal';
+
+const moment = extendMoment(Moment);
 
 export default class LogItemField extends Component {
   static propTypes = {
@@ -18,7 +33,11 @@ export default class LogItemField extends Component {
       downText: PropTypes.string
     }).isRequired,
     parent: PropTypes.objectOf(PropTypes.any).isRequired,
-    patchParent: PropTypes.func.isRequired
+    patchParent: PropTypes.func.isRequired,
+    exercise: PropTypes.shape({
+      startDate: PropTypes.string.isRequired,
+      endDate: PropTypes.string.isRequired
+    }).isRequired
   };
 
   static get defaultProps() {
@@ -35,15 +54,27 @@ export default class LogItemField extends Component {
     this.editDate = this.editDate.bind(this);
     this.patchLog = this.patchLog.bind(this);
     this.deleteLog = this.deleteLog.bind(this);
+    this.handleTimeChange = this.handleTimeChange.bind(this);
   }
 
   state = {
     edit: this.props.logItem.inEdit,
     logStatus: this.props.logItem.status,
-    logDate: moment(this.props.logItem.date),
+    logDate: moment(this.props.logItem.date).isValid() ? moment(this.props.logItem.date) : null,
+    logTime: moment(this.props.logItem.time).isValid() ? this.props.logItem.time : '',
+    logTimePristine: this.props.logItem.time === '',
+    validRange: moment.range(moment(this.props.exercise.startDate), moment(this.props.exercise.endDate)),
     confirmShow: false,
-    confirmFunc: ''
+    confirmFunc: '',
+    dateFocused: false
   };
+
+  getTimeValidationState() {
+    if (this.state.logTimePristine) return null;
+    const valid = moment(this.state.logTime, 'HH:mm', true).isValid();
+    if (!valid) return 'error';
+    return null;
+  }
 
   startEdit() {
     this.setState({ edit: true });
@@ -60,10 +91,15 @@ export default class LogItemField extends Component {
   editDate(date) {
     this.setState({ logDate: date });
   }
+
+  handleTimeChange(e) {
+    this.setState({ logTime: e.target.value, logTimePristine: false });
+  }
+
   async patchLog() {
     const patchedLog = this.props.parent.log;
     patchedLog[this.props.indexKey].status = this.state.logStatus;
-    patchedLog[this.props.indexKey].date = this.state.logDate.format();
+    patchedLog[this.props.indexKey].date = this.state.logDate;
     patchedLog[this.props.indexKey].inEdit = false;
     patchedLog.sort((a, b) => a.date.localeCompare(b.date));
     await this.props.patchParent(this.props.parent._id, { log: patchedLog });
@@ -83,11 +119,14 @@ export default class LogItemField extends Component {
     const {
       logItem, label, indexKey, styles
     } = this.props;
-    const { edit, logStatus, logDate } = this.state;
+    const {
+      edit, logStatus, logDate, dateFocused, validRange
+    } = this.state;
     const status = logItem.status ? 'Up' : 'Down';
     const statusStyleClass = logStatus ? styles.upText : styles.downText;
     const dateString = moment(logItem.date).format('HH:mm (M/D)');
     require('react-datepicker/dist/react-datepicker.css');
+    console.log(validRange);
     return (
       <ListGroupItem key={indexKey}>
         {!edit && (
@@ -100,7 +139,7 @@ export default class LogItemField extends Component {
         )}
         {edit && (
           <div>
-            <Form inline>
+            <Form>
               <FormGroup>
                 <ControlLabel className={cn(statusStyleClass)}>{`${label}`}</ControlLabel>{' '}
                 <ToggleButtonGroup type="radio" name="status" value={logStatus} onChange={this.editStatus}>
@@ -109,15 +148,26 @@ export default class LogItemField extends Component {
                 </ToggleButtonGroup>
               </FormGroup>
               <FormGroup>
-                <DatePicker
-                  selected={logDate}
-                  onChange={this.editDate}
-                  showTimeSelect
-                  timeFormat="HH:mm"
-                  timeIntervals={1}
-                  dateFormat="LLL"
-                  timeCaption="time"
+                <SingleDatePicker
+                  date={logDate} // momentPropTypes.momentObj or null
+                  onDateChange={date => this.setState({ logDate: date })} // PropTypes.func.isRequired
+                  focused={dateFocused} // PropTypes.bool
+                  onFocusChange={({ focused }) => this.setState({ dateFocused: focused })} // PropTypes.func.isRequired
+                  id="log_item_date" // PropTypes.string.isRequired,
+                  required
+                  isOutsideRange={day => !day.within(validRange)}
                 />
+              </FormGroup>
+              <FormGroup controlId="logTime" validationState={this.getTimeValidationState()}>
+                <ControlLabel>Time</ControlLabel>
+                <FormControl
+                  type="text"
+                  value={this.state.logTime}
+                  placeholder="16:30"
+                  onChange={this.handleTimeChange}
+                />
+                <FormControl.Feedback />
+                <HelpBlock>A valid time is required</HelpBlock>
               </FormGroup>
               <Button
                 onClick={() =>

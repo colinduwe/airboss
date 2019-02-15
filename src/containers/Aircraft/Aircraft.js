@@ -66,13 +66,21 @@ export default class AircraftFeathers extends Component {
 
     this.handleToggle = this.handleToggle.bind(this);
     this.startEdit = this.startEdit.bind(this);
+    this.editLogEntry = this.editLogEntry.bind(this);
+    this.cancelLogEdit = this.cancelLogEdit.bind(this);
     this.addLogEntry = this.addLogEntry.bind(this);
+    this.patchLogEntry = this.patchLogEntry.bind(this);
+    this.deleteLogEntry = this.deleteLogEntry.bind(this);
   }
 
   state = {
     itemName: '',
     // error: null
-    mode: this.props.match.path === '/aircraft/add' ? 'add' : 'view' // view edit add
+    mode: this.props.match.path === '/aircraft/add' ? 'add' : 'view', // view edit add
+    logEdition: this.props.aircraft.log.map(entry => {
+      entry.inEdit = false;
+      return entry;
+    })
   };
 
   componentDidMount() {
@@ -115,15 +123,79 @@ export default class AircraftFeathers extends Component {
     this.setState({ mode: 'edit' });
   }
 
-  async addLogEntry() {
-    const pushedLog = this.props.aircraft.log.concat({
+  editLogEntry(item) {
+    const newLog = this.state.logEdition.reduce((result, entry) => {
+      if (entry._id === item._id) {
+        entry.inEdit = true;
+      } else {
+        entry.inEdit = false;
+      }
+      if (!entry.addedEntry) {
+        result.push(entry);
+      }
+      return result;
+    }, []);
+    this.setState({ logEdition: newLog });
+  }
+
+  cancelLogEdit() {
+    const newLog = this.state.logEdition.reduce((result, entry) => {
+      entry.inEdit = false;
+      if (!entry.addedEntry) {
+        result.push(entry);
+      }
+      return result;
+    }, []);
+    this.setState({ logEdition: newLog });
+  }
+
+  addLogEntry() {
+    const newLog = this.state.logEdition.reduce((result, entry) => {
+      entry.inEdit = false;
+      if (!entry.addedEntry) {
+        result.push(entry);
+      }
+      return result;
+    }, []);
+    const pushedLog = newLog.concat({
       _id: uuid(),
-      status: false,
-      date: new Date(),
+      status: null,
+      date: null,
       time: null,
-      inEdit: true
+      inEdit: true,
+      addedEntry: true
     });
-    await this.props.patchAirplane(this.props.aircraft._id, { log: pushedLog });
+    this.setState({ logEdition: pushedLog });
+  }
+
+  // TODO: Refactor to ensure valid data
+  async patchLogEntry(item) {
+    const patchedLog = this.state.logEdition.reduce((result, entry) => {
+      if (entry._id === item._id) {
+        entry = item;
+      }
+      result.push({
+        _id: entry._id,
+        status: entry.status,
+        date: entry.date,
+        time: entry.time
+      });
+      return result;
+    }, []);
+    await this.props.patchAirplane(this.props.aircraft._id, { log: patchedLog });
+    const logEdition = this.props.aircraft.log.map(entry => {
+      entry.inEdit = false;
+      return entry;
+    });
+    this.setState({ logEdition });
+  }
+
+  async deleteLogEntry(item) {
+    // const origLog = this.props.aircraft.log;
+    const deletedLogEdition = this.state.logEdition.filter(entry => entry._id !== item._id);
+    this.setState({ logEdition: deletedLogEdition });
+    const deletedLog = this.props.aircraft.log.filter(entry => entry._id !== item._id);
+    await this.props.patchAirplane(this.props.aircraft._id, { log: deletedLog });
   }
 
   render() {
@@ -163,7 +235,11 @@ export default class AircraftFeathers extends Component {
             <AircraftDetailView
               aircraft={aircraft}
               startEdit={this.startEdit}
+              editLogEntry={this.editLogEntry}
+              logEdition={this.state.logEdition}
               addLogEntry={this.addLogEntry}
+              patchLogEntry={this.patchLogEntry}
+              deleteLogEntry={this.deleteLogEntry}
               patchAirplane={patchAirplane}
               exercise={exercise}
               styles={styles}

@@ -44,7 +44,9 @@ const exerciseHooks = {
           text: context.data.text,
           sentBy: context.params.user ? context.params.user._id : null, // Set the id of current user
           createdAt: new Date(),
-          locations: context.data.locations
+          locations: context.data.locations,
+          startDate: context.data.startDate,
+          endDate: context.data.endDate
         };
       }
     ],

@@ -128,7 +128,7 @@ export default class FrequencyFeathers extends Component {
   }
 
   async addLogEntry() {
-    const pushedLog = this.props.frequency.log.concat({ _id: uuid(), status: false, date: new Date() });
+    const pushedLog = this.props.frequency.log.concat({ _id: uuid(), status: false, date: null });
     await this.props.patchFrequency(this.props.frequency._id, { log: pushedLog });
     this.setState({ logEditNewItem: true });
   }

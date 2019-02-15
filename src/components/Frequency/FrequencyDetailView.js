@@ -5,7 +5,13 @@ import cn from 'classnames';
 import LogItemField from 'components/LogItem/LogItemField';
 
 const FrequencyDetailView = ({
-  frequency, patchFrequency, styles, startEdit, addLogEntry, logEditNewItem
+  frequency,
+  patchFrequency,
+  styles,
+  startEdit,
+  addLogEntry,
+  logEditNewItem,
+  exercise
 }) => (
   <div>
     <h1 className="text-center">
@@ -41,6 +47,7 @@ const FrequencyDetailView = ({
             styles={styles}
             parent={frequency}
             patchParent={patchFrequency}
+            exercise={exercise}
           />
         );
       })}
@@ -63,6 +70,7 @@ FrequencyDetailView.propTypes = {
   frequency: PropTypes.objectOf(PropTypes.any).isRequired,
   patchFrequency: PropTypes.func.isRequired,
   startEdit: PropTypes.func.isRequired,
+  exercise: PropTypes.objectOf(PropTypes.any).isRequired,
   addLogEntry: PropTypes.func.isRequired,
   logEditNewItem: PropTypes.bool.isRequired,
   styles: PropTypes.shape({

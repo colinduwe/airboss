@@ -2,10 +2,20 @@ import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { ListGroup } from 'react-bootstrap';
 import cn from 'classnames';
-import LogItemField from 'components/LogItem/LogItemField';
+import LogItem from 'components/LogItem/LogItem';
+import LogEdition from 'components/LogItem/LogEdition';
 
 const AircraftDetailView = ({
-  aircraft, patchAirplane, styles, startEdit, addLogEntry
+  aircraft,
+  patchAirplane,
+  styles,
+  startEdit,
+  editLogEntry,
+  logEdition,
+  addLogEntry,
+  patchLogEntry,
+  deleteLogEntry,
+  exercise
 }) => (
   <div>
     <h1 className="text-center">
@@ -25,18 +35,31 @@ const AircraftDetailView = ({
     </h1>
     <h3 className="text-center">{`${aircraft.location.name}`}</h3>
     <ListGroup>
-      {aircraft.log.map((logItem, index) => {
-        console.log(logItem);
+      {logEdition.map((logItem, index) => {
+        if (logItem.inEdit) {
+          return (
+            <LogEdition
+              key={logItem._id}
+              item={logItem}
+              label={aircraft.location.name}
+              patchLogEntry={patchLogEntry}
+              deleteLogEntry={deleteLogEntry}
+              exercise={exercise}
+              styles={styles}
+            />
+          );
+        }
         return (
-          <LogItemField
+          <LogItem
             key={logItem._id}
-            logItem={logItem}
+            item={logItem}
             label={aircraft.location.name}
             indexKey={index}
-            logEditNewItem={logItem.inEdit}
-            styles={styles}
+            startEdit={editLogEntry}
             parent={aircraft}
             patchParent={patchAirplane}
+            exercise={exercise}
+            styles={styles}
           />
         );
       })}
@@ -59,7 +82,15 @@ AircraftDetailView.propTypes = {
   aircraft: PropTypes.objectOf(PropTypes.any).isRequired,
   patchAirplane: PropTypes.func.isRequired,
   startEdit: PropTypes.func.isRequired,
+  exercise: PropTypes.objectOf(PropTypes.any).isRequired,
+  editLogEntry: PropTypes.func.isRequired,
+  logEdition: PropTypes.arrayOf(PropTypes.shape({
+    _id: PropTypes.string,
+    inEdit: PropTypes.bool.isRequired
+  })).isRequired,
   addLogEntry: PropTypes.func.isRequired,
+  patchLogEntry: PropTypes.func.isRequired,
+  deleteLogEntry: PropTypes.func.isRequired,
   styles: PropTypes.shape({
     navbarEventTitle: PropTypes.string,
     inlineBlock: PropTypes.string

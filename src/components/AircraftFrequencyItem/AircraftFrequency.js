@@ -5,6 +5,7 @@ import moment from 'moment';
 import { Link } from 'react-router-dom';
 import { ToggleButtonGroup, ToggleButton } from 'react-bootstrap';
 import ConfirmModal from 'components/ConfirmModal/ConfirmModal';
+import uuid from 'uuid/v4';
 
 export default class AircraftFrequency extends Component {
   static propTypes = {
@@ -32,7 +33,7 @@ export default class AircraftFrequency extends Component {
 
   confirmLogEntry = async () => {
     const logStatus = !this.props.status;
-    const log = this.props.thisItem.log.concat({ status: logStatus, date: new Date() });
+    const log = this.props.thisItem.log.concat({ _id: uuid(), status: logStatus, date: new Date() });
     await this.props.patchItem(this.props.thisItem._id, { status: logStatus, log });
     this.setState({ confirmShow: false });
   };
